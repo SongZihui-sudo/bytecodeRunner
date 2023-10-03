@@ -51,39 +51,41 @@ xxx:
 
 #### 有关栈
 
-`push source(立即数/寄存器/内存)` 把 `source` push 到栈里。
+`push source(立即数/寄存器/内存)` 把 `source` push 到栈里。  
 `pop [destination(寄存器)]` 把栈顶元素 `pop` 到 `destination` 里
 
 #### 基本运算
 
-`add num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 + num2
-`sub num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 - num1
-`mul num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 \* num2
-`div num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 / num1
-`cmp destination(立即数/寄存器/内存) source(立即数/寄存器/内存)` 比较 num1 与 num2.如果 `num1 > num2` -> `SF=1`,`num1 < num2`->`SF=0`, `num1 == num2`->`ZF=1`,`num1 != num2`->`ZF=0`.
+`add num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 + num2   
+`sub num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 - num1   
+`mul num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 \* num2    
+`div num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 / num1     
+`cmp destination(立即数/寄存器/内存) source(立即数/寄存器/内存)` 比较 num1 与 num2.如果 `num1 > num2` -> `SF=1`,`num1 < num2`->`SF=0`, `num1 == num2`->`ZF=1`,`num1 != num2`->`ZF=0`.   
 
 #### 跳转
 
-`jmp destination(立即数/寄存器/内存/标签)` 直接跳转到 `destination` 处
-`jne destination(立即数/寄存器/内存/标签)` 如果 `cmp` 比较的结果为不相等就跳转
-`je destination(立即数/寄存器/内存/标签)` 如果 `cmp` 比较的结果为相等就跳转
-`jbe destination(立即数/寄存器/内存/标签)` 如果低于或等于(<=)则跳转
-`ja destination(立即数/寄存器/内存/标签)` 如果超过(>)则跳转
-`jb destination(立即数/寄存器/内存/标签)` 如果进位位被置位则跳转
-`jnb destination(立即数/寄存器/内存/标签)` 如果进位位没有置位则跳转
-`call destination(立即数/寄存器/内存/标签)`调用 `destination` 处的函数 `ret` 从调用的函数中返回 `leave` 用在 main 函数的结尾来进行退出
+`jmp destination(立即数/寄存器/内存/标签)` 直接跳转到 `destination` 处    
+`jne destination(立即数/寄存器/内存/标签)` 如果 `cmp` 比较的结果为不相等就跳转   
+`je destination(立即数/寄存器/内存/标签)` 如果 `cmp` 比较的结果为相等就跳转   
+`jbe destination(立即数/寄存器/内存/标签)` 如果低于或等于(<=)则跳转     
+`ja destination(立即数/寄存器/内存/标签)` 如果超过(>)则跳转     
+`jb destination(立即数/寄存器/内存/标签)` 如果进位位被置位则跳转   
+`jnb destination(立即数/寄存器/内存/标签)` 如果进位位没有置位则跳转   
+`call destination(立即数/寄存器/内存/标签)`调用 `destination` 处的函数   
+`ret` 从调用的函数中返回    
+`leave` 用在 main 函数的结尾来进行退出   
 
 #### 调试
-
-`pr register_name(字符串)` 打印 `register_name` 指定的寄存器内容
-`pm source(数字) count(数字)` 打印内存地址从 `source` 开始的 `count` 个内容
-`ps` 打印栈
-`p message(字符串)` 打印自定义消息
-`exit` 退出
+  
+`pr register_name(字符串)` 打印 `register_name` 指定的寄存器内容   
+`pm source(数字) count(数字)` 打印内存地址从 `source` 开始的 `count` 个内容   
+`ps` 打印栈   
+`p message(字符串)` 打印自定义消息   
+`exit` 退出  
 
 #### 数据传送
 
-`mov source(立即数/寄存器/内存) destination(立即数/寄存器/内存)`
+`mov source(立即数/寄存器/内存) destination(立即数/寄存器/内存)`   
 
 ## 例程
 
