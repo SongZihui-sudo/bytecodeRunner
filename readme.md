@@ -1,6 +1,6 @@
 # Bytecode Runner
 
-[中文](./readme_cn.md)
+[中文](./readme_zh_cn.md)
 
 > A simple bytecode runner
 
