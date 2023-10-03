@@ -58,22 +58,24 @@ xxx:
 
 #### Basic operations
 
-`add num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 + num2
-`sub num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 - num1
-`mul num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 \* num2
-`div num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 / num1
-`cmp destination(immediate value/register/memory) source(immediate value/register/memory)` Compare num1 and num2. If `num1 > num2` -> `SF=1`, `num1 < num2`->`SF= 0`, `num1 == num2`->`ZF=1`, `num1 != num2`->`ZF=0`.
+`add num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 + num2   
+`sub num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 - num1   
+`mul num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 \* num2   
+`div num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 / num1   
+`cmp destination(immediate value/register/memory) source(immediate value/register/memory)` Compare num1 and num2. If `num1 > num2` -> `SF=1`, `num1 < num2`->`SF= 0`, `num1 == num2`->`ZF=1`, `num1 != num2`->`ZF=0`.   
 
 #### Jump
 
-`jmp destination(immediate value/register/memory/label)` jumps directly to `destination`
-`jne destination(immediate value/register/memory/label)` jumps if the result of `cmp` comparison is not equal
-`je destination(immediate value/register/memory/label)` jumps if the result of `cmp` comparison is equal
-`jbe destination(immediate value/register/memory/label)` jump if lower than or equal to (<=)
-`ja destination(immediate value/register/memory/label)` jump if it exceeds (>)
-`jb destination(immediate/register/memory/label)` jumps if the carry bit is set
-`jnb destination(immediate value/register/memory/label)` jumps if the carry bit is not set
-`call destination(immediate/register/memory/label)` calls the function at `destination` `ret` returns from the called function `leave` is used at the end of the main function to exit
+`jmp destination(immediate value/register/memory/label)` jumps directly to `destination`   
+`jne destination(immediate value/register/memory/label)` jumps if the result of `cmp` comparison is not equal   
+`je destination(immediate value/register/memory/label)` jumps if the result of `cmp` comparison is equal   
+`jbe destination(immediate value/register/memory/label)` jump if lower than or equal to (<=)   
+`ja destination(immediate value/register/memory/label)` jump if it exceeds (>)   
+`jb destination(immediate/register/memory/label)` jumps if the carry bit is set   
+`jnb destination(immediate value/register/memory/label)` jumps if the carry bit is not set   
+`call destination(immediate/register/memory/label)` calls the function at `destination`     
+`ret` returns from the called function        
+`leave` is used at the end of the main function to exit     
 
 #### debug
 
