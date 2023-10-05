@@ -1,7 +1,57 @@
 #include "instruction.hpp"
 #include "machine.hpp"
 
+#include <sstream>
+#include <fstream>
+#include <array>
+
+std::unordered_map< std::string, unsigned int > var_table;
+
 std::unordered_map< std::string, size_t > label_table;
+
+std::vector< std::string > code_list;
+
+const std::unordered_map< std::string, std::function< void( token, token ) > > do_instruction_func
+= { { "HELP",
+      []( token arg1, token arg2 )
+      {
+          std::cout << "help: print help message" << std::endl;
+          std::cout << "exit: exit the program" << std::endl;
+          std::cout << "pr [register name]: print register" << std::endl;
+          std::cout << "pm [start index] [read size]: print memory" << std::endl;
+      } },
+    { "EXIT", []( token arg1, token arg2 ) { exit( 0 ); } },
+    { "LEAVE", []( token arg1, token arg2 ) { exit( 0 ); } },
+    { "PR", []( token arg1, token arg2 ) { visual_machine.print_reg( arg1.name ); } },
+    { "PM",
+      []( token arg1, token arg2 )
+      {
+          std::cout << "Please input the start index: ";
+          unsigned int start;
+          std::cin >> start;
+          std::cout << "Please input the read size: ";
+          unsigned int read_size;
+          std::cin >> read_size;
+          visual_machine.print_memory( start, read_size );
+      } },
+    { "PS", []( token arg1, token arg2 ) { visual_machine.print_stack(); } },
+    { "MOV", do_mov },
+    { "ADD", do_add },
+    { "SUB", do_sub },
+    { "MUL", do_mul },
+    { "DIV", do_div },
+    { "PUSH", do_push },
+    { "POP", do_pop },
+    { "JMP", do_jmp },
+    { "CMP", do_cmp },
+    { "JE", do_je },
+    { "JNE", do_jne },
+    { "JBE", do_jbe },
+    { "JA", do_ja },
+    { "JB", do_jb },
+    { "JNB", do_jnb },
+    { "CALL", do_call },
+    { "RET", do_ret } };
 
 bool isNumber( const std::string& str )
 {
@@ -13,233 +63,362 @@ bool isNumber( const std::string& str )
     return true;
 }
 
-bool do_instruction( std::string line )
+bool do_instruction( std::vector< token > line )
 {
-    size_t index    = 0;
-    std::string tmp = line.substr( index, line.find( ' ' ) );
-#define xx( instruction_name, instuction_name_up )                                         \
-    if ( tmp == #instruction_name || tmp == #instuction_name_up )                          \
-    {                                                                                      \
-        line.erase( 0, std::string( #instruction_name ).size() + 1 );                      \
-        do_##instruction_name( line );                                                     \
-    }
-    instruction_xx
-#undef xx
-    else
+
+    line.push_back( token() );
+    if ( do_instruction_func.count( line[0].name ) )
     {
-        DEBUG_INFO( "Error Code!" )
-        return false;
+        do_instruction_func.at( line[0].name )( line[1], line[2] );
+        return true;
     }
     return true;
 }
 
-void do_mov( std::string code )
+void do_mov( token dist, token source )
 {
-    const size_t index  = 0;
-    unsigned int pos[2] = { 0, 0 };
-    for ( size_t i = 0; i < 2; i++ )
-    {
-        get_word();
-        take_number( if ( i == 1 ) {
-            DEBUG_INFO( "The destination cannot be a number!" );
-            return;
-        } ) else take_memory( if ( i == 1 ) { visual_machine.set_memory( pos[1], pos[0] ); } )
-#define xx( reg, uppercase_reg )                                                           \
-    if ( tmp == #reg || tmp == #uppercase_reg )                                            \
-    {                                                                                      \
-        pos[i] = visual_machine.get_##uppercase_reg();                                     \
-        if ( i == 1 )                                                                      \
-        {                                                                                  \
-            visual_machine.set_##uppercase_reg( pos[0] );                                  \
-        }                                                                                  \
-    }
-        register_xx
-#undef xx
-        else
-        {
-            DEBUG_INFO( "The register name is wrong! Register Name: " + tmp );
-            return;
-        }
-    }
-}
-
-void do_add( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 )
-             { visual_machine.set_ACC( ( *pos1 ) + ( *pos2 ) ); },
-             code,
-             2 );
-}
-
-void do_sub( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 )
-             { visual_machine.set_ACC( *( pos2 ) - *( pos1 ) ); },
-             code,
-             2 );
-}
-
-void do_div( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 )
-             { visual_machine.set_MQ( ( *pos2 ) / ( *pos1 ) ); },
-             code,
-             2 );
-}
-
-void do_mul( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 )
-             { visual_machine.set_MQ( ( *pos1 ) * ( *pos2 ) ); },
-             code,
-             2 );
-}
-
-void do_push( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 ) { visual_machine.push( *pos1 ); }, code, 1 );
-}
-
-void do_pop( std::string code )
-{
-    if ( isNumber( code ) && !code.empty() )
+    if ( dist.type == NUMBER )
     {
         DEBUG_INFO( "The destination should not be a number!" );
     }
     else
     {
-#define xx( reg, uppercase_reg )                                                           \
-    if ( code == #reg || code == #uppercase_reg )                                          \
-    {                                                                                      \
-        unsigned int tmp = visual_machine.top();                                           \
-        visual_machine.set_##uppercase_reg( tmp );                                         \
-    }
-        register_xx
-#undef xx
-    }
-    visual_machine.pop();
-}
-
-void do_jmp( std::string code )
-{
-    do_code( []( unsigned int* pos1, unsigned int* pos2 ) { visual_machine.set_PC( *pos1 ); }, code, 1 );
-}
-
-void do_cmp( std::string code )
-{
-    do_code(
-    []( unsigned int* pos1, unsigned int* pos2 )
-    {
-        if ( *pos1 == *pos2 )
+        unsigned int tmp = source.value;
+        if ( source.type == MEMORY )
         {
-            visual_machine.set_ZF( 1 );
+            tmp = visual_machine.get_memory( tmp );
+        }
+        if ( dist.type == REGISTER )
+        {
+            visual_machine.set_register( dist.name, tmp );
+        }
+        else if ( dist.type == VAR )
+        {
+            var_table[dist.name] = tmp;
+        }
+        else if ( dist.type == MEMORY )
+        {
+            visual_machine.set_memory( dist.value, tmp );
         }
         else
         {
-            visual_machine.set_ZF( 0 );
+            DEBUG_INFO( "The destination should be a register or a variable!" );
         }
-        if ( *pos1 > *pos2 )
+    }
+}
+
+void do_add( token dist, token source )
+{
+    unsigned int tmp1 = dist.value;
+    unsigned int tmp2 = source.value;
+    if ( dist.type == MEMORY )
+    {
+        tmp1 = visual_machine.get_memory( tmp1 );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        tmp1 = visual_machine.get_register( dist.name );
+    }
+    else if ( dist.type == VAR )
+    {
+        tmp1 = var_table[dist.name];
+    }
+    if ( source.type == MEMORY )
+    {
+        tmp2 = visual_machine.get_memory( tmp2 );
+    }
+    else if ( source.type == REGISTER )
+    {
+        tmp2 = visual_machine.get_register( source.name );
+    }
+    else if ( source.type == VAR )
+    {
+        tmp2 = var_table[source.name];
+    }
+    visual_machine.set_register( "ACC", tmp1 + tmp2 );
+}
+
+void do_sub( token dist, token source )
+{
+    unsigned int tmp1 = dist.value;
+    unsigned int tmp2 = source.value;
+    if ( dist.type == MEMORY )
+    {
+        tmp1 = visual_machine.get_memory( tmp1 );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        tmp1 = visual_machine.get_register( dist.name );
+    }
+    else if ( dist.type == VAR )
+    {
+        tmp1 = var_table[dist.name];
+    }
+    if ( source.type == MEMORY )
+    {
+        tmp2 = visual_machine.get_memory( tmp2 );
+    }
+    else if ( source.type == REGISTER )
+    {
+        tmp2 = visual_machine.get_register( source.name );
+    }
+    else if ( source.type == VAR )
+    {
+        tmp2 = var_table[source.name];
+    }
+    visual_machine.set_register( "ACC", tmp1 - tmp2 );
+}
+
+void do_div( token dist, token source )
+{
+    unsigned int tmp1 = dist.value;
+    unsigned int tmp2 = source.value;
+    if ( dist.type == MEMORY )
+    {
+        tmp1 = visual_machine.get_memory( tmp1 );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        tmp1 = visual_machine.get_register( dist.name );
+    }
+    else if ( dist.type == VAR )
+    {
+        tmp1 = var_table[dist.name];
+    }
+    if ( source.type == MEMORY )
+    {
+        tmp2 = visual_machine.get_memory( tmp2 );
+    }
+    else if ( source.type == REGISTER )
+    {
+        tmp2 = visual_machine.get_register( source.name );
+    }
+    else if ( source.type == VAR )
+    {
+        tmp2 = var_table[source.name];
+    }
+    visual_machine.set_register( "MQ", tmp1 / tmp2 );
+}
+
+void do_mul( token dist, token source )
+{
+    unsigned int tmp1 = dist.value;
+    unsigned int tmp2 = source.value;
+    if ( dist.type == MEMORY )
+    {
+        tmp1 = visual_machine.get_memory( tmp1 );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        tmp1 = visual_machine.get_register( dist.name );
+    }
+    else if ( dist.type == VAR )
+    {
+        tmp1 = var_table[dist.name];
+    }
+    if ( source.type == MEMORY )
+    {
+        tmp2 = visual_machine.get_memory( tmp2 );
+    }
+    else if ( source.type == REGISTER )
+    {
+        tmp2 = visual_machine.get_register( source.name );
+    }
+    else if ( source.type == VAR )
+    {
+        tmp2 = var_table[source.name];
+    }
+    visual_machine.set_register( "MQ", tmp1 * tmp2 );
+}
+
+void do_push( token dist, token source )
+{
+    if ( dist.type == NUMBER )
+    {
+        visual_machine.push( dist.value );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        visual_machine.push( visual_machine.get_register( dist.name ) );
+    }
+    else if ( dist.type == VAR )
+    {
+        visual_machine.push( var_table[dist.name] );
+    }
+    else if ( dist.type == MEMORY )
+    {
+        visual_machine.push( visual_machine.get_memory( dist.value ) );
+    }
+    else
+    {
+        DEBUG_INFO( "The dist should be a number or a register or a variable!" );
+    }
+}
+
+void do_pop( token dist, token source )
+{
+    if ( dist.type == NUMBER )
+    {
+        DEBUG_INFO( "The destination should not be a number!" );
+    }
+    else
+    {
+        unsigned int tmp = visual_machine.top();
+        if ( dist.type == REGISTER )
         {
-            visual_machine.set_SF( 1 );
+            visual_machine.set_register( dist.name, tmp );
+        }
+        else if ( dist.type == VAR )
+        {
+            var_table[dist.name] = tmp;
+        }
+        else if ( dist.type == MEMORY )
+        {
+            visual_machine.set_memory( dist.value, tmp );
         }
         else
         {
-            visual_machine.set_SF( 0 );
+            DEBUG_INFO( "The destination should be a register or a variable!" );
         }
-    },
-    code,
-    2 );
-}
-
-void do_je( std::string code )
-{
-    if ( visual_machine.get_ZF() )
-    {
-        do_jmp( code );
     }
-}
-
-void do_jne( std::string code )
-{
-    if ( !visual_machine.get_ZF() )
-    {
-        do_jmp( code );
-    }
-}
-
-void do_jbe( std::string code )
-{
-    if ( visual_machine.get_ZF() || visual_machine.get_SF() )
-    {
-        do_jmp( code );
-    }
-}
-
-void do_ja( std::string code )
-{
-    if ( !visual_machine.get_ZF() && !visual_machine.get_SF() )
-    {
-        do_jmp( code );
-    }
-}
-
-void do_jb( std::string code )
-{
-    if ( visual_machine.get_SF() )
-    {
-        do_jmp( code );
-    }
-}
-
-void do_jnb( std::string code )
-{
-    if ( !visual_machine.get_SF() )
-    {
-        do_jmp( code );
-    }
-}
-
-void do_call( std::string code )
-{
-    do_code(
-    []( unsigned int* pos1, unsigned int* pos2 )
-    {
-        visual_machine.push( visual_machine.get_PC() );
-        visual_machine.set_PC( *pos1 );
-    },
-    code,
-    1 );
-}
-
-void do_ret( std::string code )
-{
-    visual_machine.set_PC( visual_machine.top() );
     visual_machine.pop();
-    unsigned int tmp = visual_machine.top();
-    visual_machine.set_EBP( visual_machine.top() );
-    visual_machine.pop();
-    visual_machine.set_ESP( tmp );
 }
 
-void do_code( std::function< void( unsigned int*, unsigned int* ) > func, std::string code, int count )
+void do_jmp( token dist, token source )
 {
-    const size_t index  = 0;
-    unsigned int pos[2] = { 0, 0 };
-    size_t space        = code.find( ' ' );
-    for ( size_t i = 0; i < count; i++ )
+    if ( dist.type == MEMORY )
     {
-        std::string tmp = code.substr( index, space );
-        code            = code.substr( space + 1, code.size() );
-        take_number() else take_memory() else take_label( code )
-#define xx( reg, uppercase_reg )                                                           \
-    if ( tmp == #reg || tmp == #uppercase_reg )                                            \
-    {                                                                                      \
-        pos[i] = visual_machine.get_##uppercase_reg();                                     \
+        visual_machine.set_register( "PC", visual_machine.get_memory( dist.value ) );
     }
-        register_xx
-#undef xx
-        space
-        = code.find( ' ' );
+    else if ( dist.type == LABEL || dist.type == NUMBER || dist.type == VAR || dist.type == REGISTER )
+    {
+        visual_machine.set_register( "PC", dist.value );
     }
-    func( &pos[0], &pos[1] );
+    else
+    {
+        DEBUG_INFO( "The destination should be a number or a variable!" );
+    }
+}
+
+void do_cmp( token dist, token source )
+{
+    if ( dist.type == NUMBER )
+    {
+        visual_machine.set_register( "ZF", dist.value == source.value );
+        visual_machine.set_register( "SF", dist.value < source.value );
+    }
+    else if ( dist.type == REGISTER )
+    {
+        visual_machine.set_register( "ZF",
+                                     visual_machine.get_register( dist.name ) == source.value );
+        visual_machine.set_register( "SF", visual_machine.get_register( dist.name ) < source.value );
+    }
+    else if ( dist.type == VAR )
+    {
+        visual_machine.set_register( "ZF", var_table[dist.name] == source.value );
+        visual_machine.set_register( "SF", var_table[dist.name] < source.value );
+    }
+    else if ( dist.type == MEMORY )
+    {
+        visual_machine.set_register( "ZF", visual_machine.get_memory( dist.value ) == source.value );
+        visual_machine.set_register( "SF", visual_machine.get_memory( dist.value ) < source.value );
+    }
+    else
+    {
+        DEBUG_INFO( "The destination should be a number or a register or a variable!" );
+    }
+}
+
+void do_je( token dist, token source )
+{
+    if ( visual_machine.get_register( "ZF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_jne( token dist, token source )
+{
+    if ( !visual_machine.get_register( "ZF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_jbe( token dist, token source )
+{
+    if ( visual_machine.get_register( "ZF" ) || visual_machine.get_register( "SF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_ja( token dist, token source )
+{
+    if ( !visual_machine.get_register( "ZF" ) && !visual_machine.get_register( "ZF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_jb( token dist, token source )
+{
+    if ( visual_machine.get_register( "SF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_jnb( token dist, token source )
+{
+    if ( !visual_machine.get_register( "SF" ) )
+    {
+        do_jmp( dist, source );
+    }
+}
+
+void do_call( token dist, token source )
+{
+    visual_machine.push( visual_machine.get_register( "PC" ) );
+    if ( dist.type == MEMORY )
+    {
+        visual_machine.set_register( "PC", visual_machine.get_memory( dist.value ) );
+    }
+    else if ( dist.type == LABEL || dist.type == NUMBER || dist.type == VAR || dist.type == REGISTER )
+    {
+        visual_machine.set_register( "PC", dist.value );
+    }
+    else
+    {
+        DEBUG_INFO( "The destination should be a number or a variable!" );
+    }
+}
+
+void do_ret( token dist, token source )
+{
+
+    visual_machine.set_register( "PC", visual_machine.top() );
+    visual_machine.pop();
+}
+
+void load_file( std::string file_name )
+{
+    std::ifstream file( file_name );
+    if ( !file.is_open() )
+    {
+        DEBUG_INFO( "File not found!" );
+        return;
+    }
+    std::string line;
+    while ( std::getline( file, line ) )
+    {
+        size_t index = 0;
+        while ( line[index] == ' ' )
+        {
+            index++;
+        }
+        line.erase( 0, index );
+        code_list.push_back( line );
+    }
+    file.close();
 }

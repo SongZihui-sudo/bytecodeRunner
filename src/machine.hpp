@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
+#include <algorithm>
 
 #define DEBUG_INFO( mesage )                                                               \
     std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
@@ -13,9 +15,8 @@
 
 /*
     ADDRESS SPACE
-    0 ~ 511 memory
-    512 ~ 639 stack
-    640 ~ 2047 memory
+    0 ~ 511 stack
+    512 ~ 2047 memory
 */
 
 /**
@@ -35,22 +36,11 @@ public:
      */
     void print_reg( std::string reg )
     {
-#define xx( reg_, uppercase_reg )                                                          \
-    if ( reg == #reg_ || reg == #uppercase_reg )                                           \
-    {                                                                                      \
-        std::cout << reg << ": " << std::hex << get_##uppercase_reg() << std::endl;        \
-    }
-        xx( eax, EAX ) else xx( ebx, EBX ) else xx( ecx, ECX ) else xx( edx, EDX ) else xx( esp, ESP ) else xx( ebp, EBP ) else xx( esi, ESI ) else xx( edi, EDI ) else xx(
-        acc,
-        ACC ) else xx( mq,
-                       MQ ) else xx( r8,
-                                     R8 ) else xx( r9,
-                                                   R9 ) else xx( r10,
-                                                                 R10 ) else xx( r11,
-                                                                                R11 ) else xx( r12,
-                                                                                               R12 ) else xx( r13,
-                                                                                                              R13 ) else xx( r14, R14 ) else xx( r15, R15 )
-#undef xx
+        std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
+        if ( register_map.count( reg ) )
+        {
+            std::cout << reg << ": " << std::hex << register_map[reg] << std::endl;
+        }
         else
         {
             DEBUG_INFO( "UNKONEN REGISTER NAME!" );
@@ -102,76 +92,6 @@ public:
 
 public:
     /**
-     * @brief set EAX register
-     *
-     * @param value
-     */
-    void set_EAX( const unsigned int value ) { EAX = value; }
-
-    /**
-     * @brief set EBX register
-     *
-     * @param value
-     */
-    void set_EBX( const unsigned int value ) { EBX = value; }
-
-    /**
-     * @brief set ECX register
-     *
-     * @param value
-     */
-    void set_ECX( const unsigned int value ) { ECX = value; }
-
-    /**
-     * @brief set EDX register
-     *
-     * @param value
-     */
-    void set_EDX( const unsigned int value ) { EDX = value; }
-
-    /**
-     * @brief set ESP register
-     *
-     * @param value
-     */
-    void set_ESP( const unsigned int value ) { ESP = value; }
-
-    /**
-     * @brief set EBP register
-     *
-     * @param value
-     */
-    void set_EBP( const unsigned int value ) { EBP = value; }
-
-    /**
-     * @brief set ESI register
-     *
-     * @param value
-     */
-    void set_ESI( const unsigned int value ) { ESI = value; }
-
-    /**
-     * @brief set EDI register
-     *
-     * @param value
-     */
-    void set_EDI( const unsigned int value ) { EDI = value; }
-
-    /**
-     * @brief set ACC register
-     *
-     * @param value
-     */
-    void set_ACC( const unsigned int value ) { ACC = value; }
-
-    /**
-     * @brief set MQ register
-     *
-     * @param value
-     */
-    void set_MQ( const unsigned int value ) { MQ = value; }
-
-    /**
      * @brief Set the memory object
      *
      * @param index
@@ -192,153 +112,6 @@ public:
     }
 
     /**
-     * @brief set R8 register
-     *
-     * @param value
-     */
-    void set_R8( const unsigned int value ) { R8 = value; }
-
-    /**
-     * @brief set R9 register
-     *
-     * @param value
-     */
-    void set_R9( const unsigned int value ) { R9 = value; }
-
-    /**
-     * @brief set R10 register
-     *
-     * @param value
-     */
-    void set_R10( const unsigned int value ) { R10 = value; }
-
-    /**
-     * @brief set R11 register
-     *
-     * @param value
-     */
-    void set_R11( const unsigned int value ) { R11 = value; }
-
-    /**
-     * @brief set R12 register
-     *
-     * @param value
-     */
-    void set_R12( const unsigned int value ) { R12 = value; }
-
-    /**
-     * @brief set R13 register
-     *
-     * @param value
-     */
-    void set_R13( const unsigned int value ) { R13 = value; }
-
-    /**
-     * @brief set R14 register
-     *
-     * @param value
-     */
-    void set_R14( const unsigned int value ) { R14 = value; }
-
-    /**
-     * @brief set R15 register
-     *
-     * @param value
-     */
-    void set_R15( const unsigned int value ) { R15 = value; }
-
-    /**
-     * @brief set PC register
-     *
-     * @param value
-     */
-    void set_PC( const unsigned int value ) { PC = value; }
-
-    /**
-     * @brief set ZF register
-     *
-     * @param value
-     */
-    void set_ZF( const unsigned int value ) { ZF = value; }
-
-    /**
-     * @brief set SF register
-     *
-     * @param value
-     */
-    void set_SF( const unsigned int value ) { SF = value; }
-
-    /**
-     * @brief get EAX register
-     *
-     * @return EAX value
-     */
-    unsigned int get_EAX() const { return EAX; }
-
-    /**
-     * @brief get EBX register
-     *
-     * @return EBX value
-     */
-    unsigned int get_EBX() const { return EBX; }
-
-    /**
-     * @brief get ECX register
-     *
-     * @return ECX value
-     */
-    unsigned int get_ECX() const { return ECX; }
-
-    /**
-     * @brief get EDX register
-     *
-     * @return EDX value
-     */
-    unsigned int get_EDX() const { return EDX; }
-
-    /**
-     * @brief get ESP register
-     *
-     * @return ESP value
-     */
-    unsigned int get_ESP() const { return ESP; }
-
-    /**
-     * @brief get EBP register
-     *
-     * @return EBP value
-     */
-    unsigned int get_EBP() const { return EBP; }
-
-    /**
-     * @brief get ESI register
-     *
-     * @return ESI value
-     */
-    unsigned int get_ESI() const { return ESI; }
-
-    /**
-     * @brief get EDI register
-     *
-     * @return EDI value
-     */
-    unsigned int get_EDI() const { return EDI; }
-
-    /**
-     * @brief set ACC register
-     *
-     * @return unsigned int
-     */
-    unsigned int get_ACC() const { return ACC; }
-
-    /**
-     * @brief get MQ register
-     *
-     * @return unsigned int
-     */
-    unsigned int get_MQ() const { return MQ; }
-
-    /**
      * @brief get memory value
      *
      * @param index
@@ -346,7 +119,7 @@ public:
      */
     unsigned int get_memory( const size_t index )
     {
-        if ( index > MEMORY_SIZE )
+        if ( index > MEMORY_SIZE || index < 0 )
         {
             return 0;
         }
@@ -354,134 +127,82 @@ public:
     }
 
     /**
-     * @brief set R8 register
+     * @brief set register value
      *
      * @param value
      */
-    unsigned int get_R8() { return R8; }
+    unsigned int get_register( std::string reg )
+    {
+        std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
+        return register_map[reg];
+    }
 
     /**
-     * @brief set R9 register
+     * @brief is a register
      *
      * @param value
      */
-    unsigned int get_R9() { return R9; }
+    bool is_register( std::string reg )
+    {
+        std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
+        return register_map.count( reg );
+    }
 
     /**
-     * @brief set R10 register
+     * @brief set register value
      *
      * @param value
      */
-    unsigned int get_R10() { return R10; }
-
-    /**
-     * @brief set R11 register
-     *
-     * @param value
-     */
-    unsigned int get_R11() { return R11; }
-
-    /**
-     * @brief set R12 register
-     *
-     * @param value
-     */
-    unsigned int get_R12() { return R12; }
-
-    /**
-     * @brief set R13 register
-     *
-     * @param value
-     */
-    unsigned int get_R13() { return R13; }
-
-    /**
-     * @brief set R14 register
-     *
-     * @param value
-     */
-    unsigned int get_R14() { return R14; }
-
-    /**
-     * @brief set R15 register
-     *
-     * @param value
-     */
-    unsigned int get_R15() { return R15; }
-
-    /**
-     * @brief get PC register
-     *
-     * @return unsigned int
-     */
-    unsigned int get_PC() { return PC; }
-
-    /**
-     * @brief get ZF register
-     *
-     * @return unsigned int
-     */
-    unsigned int get_ZF() { return ZF; }
-
-    /**
-     * @brief get SF register
-     *
-     * @return unsigned int
-     */
-    unsigned int get_SF() { return SF; }
+    void set_register( std::string reg, unsigned int value )
+    {
+        std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
+        register_map[reg] = value;
+    }
 
 public:
     void push( unsigned int value )
     {
-        if ( ESP < 512 )
+        if ( register_map["ESP"] > 511 )
         {
             DEBUG_INFO( "The stack is full!" );
             return;
         }
         else
         {
-            memory[ESP] = value;
-            ESP--;
+            memory[register_map["ESP"]] = value;
+            register_map["ESP"]++;
         }
     }
 
     void pop()
     {
-        if ( ESP > 639 )
+        if ( !register_map["ESP"] )
         {
             DEBUG_INFO( "The stack is empty!" );
             return;
         }
-        ESP--;
+        register_map["ESP"]--;
     }
 
-    unsigned int top() { return memory[ESP]; }
+    unsigned int top()
+    {
+        if ( !register_map["ESP"] )
+        {
+            DEBUG_INFO( "The stack is empty!" );
+            return 0;
+        }
+        return memory[register_map["ESP"] - 1];
+    }
 
-    bool stack_empty() { return ESP == 512; }
+    bool stack_empty() { return register_map["ESP"] == 511; }
 
 private:
-    unsigned int ZF;
-    unsigned int SF;
-    unsigned int PC;
-    unsigned int R8;
-    unsigned int R9;
-    unsigned int R10;
-    unsigned int R11;
-    unsigned int R12;
-    unsigned int R13;
-    unsigned int R14;
-    unsigned int R15;
+    std::unordered_map< std::string, unsigned int > register_map
+    = { { "ZF", 0 },  { "SF", 0 },  { "PC", 0 },  { "R8", 0 },  { "R9", 0 },  { "R10", 0 },
+        { "R11", 0 }, { "R12", 0 }, { "R13", 0 }, { "R14", 0 }, { "R15", 0 }, { "EAX", 0 },
+        { "EBX", 0 }, { "ECX", 0 }, { "EDX", 0 }, { "ESP", 0 }, { "EBP", 0 }, { "ESI", 0 },
+        { "EDI", 0 }, { "ACC", 0 }, { "MQ", 0 } };
     unsigned int memory[MEMORY_SIZE];
-    unsigned int EAX;
-    unsigned int EBX;
-    unsigned int ECX;
-    unsigned int EDX;
-    unsigned int ESP = 639;
-    unsigned int EBP = 639;
-    unsigned int ESI;
-    unsigned int EDI;
-    unsigned int ACC;
-    unsigned int MQ;
 };
 
 // visual machine

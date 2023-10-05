@@ -4,95 +4,28 @@
 #include <sstream>
 #include <stack>
 #include <iomanip>
+#include <array>
 
 #include "machine.hpp"
 #include "instruction.hpp"
 
 machine visual_machine;
 
-static std::vector< std::string > asm_code_test1
-= { "mov 99 eax", "mov eax ebx", "mov eax [0]", "mov 101 [1]",
-    "pr ebx",     "pr eax",      "pm 0 100" };
-static std::vector< std::string > asm_code_test2
-= { "add 100 99", "pr acc", "sub 100 3",   "pr acc",
-    "mul 98 97",  "pr mq",  "div 99 3000", "pr mq" };
-static std::vector< std::string > asm_code_test3
-= { "push 99", "pop r8", "pr r8", "pr ebp", "ps" };
-static std::vector< std::string > asm_code_test4 = { "jmp 2", "add 1 2", "pr acc" };
-static std::vector< std::string > asm_code_test5
-= { "cmp 1 1", "je 3", "add 1 1", "pr acc" };
-static std::vector< std::string > asm_code_test6
-= { "jmp test_label", "add 1 2", "test_label:", "pr acc", "# test code 6" };
-static std::vector< std::string > asm_code_test7
-= { "test_func():", "push ebp", "mov ebp esp", "add 1 1",          "pr acc", "ret",
-    "main():",      "push ebp", "mov ebp esp", "call test_func()", "leave",  "ret" };
-
-#define current_code_stream asm_code_test1
+#define current_code_stream code_list
 
 /**
  * @brief repl
  *
  */
-void repl()
+void repl( std::vector< std::vector< token > > tokens )
 {
-    std::string line;
-    while ( visual_machine.get_PC() < current_code_stream.size() )
+    std::vector< token > line;
+    while ( visual_machine.get_register( "PC" ) < tokens.size() )
     {
-        line            = current_code_stream[visual_machine.get_PC()];
-        size_t index    = 0;
-        std::string tmp = line.substr( index, line.find( ' ' ) );
-        visual_machine.set_PC( visual_machine.get_PC() + 1 );
-        if ( line == "help" )
-        {
-            std::cout << "help: print help message" << std::endl;
-            std::cout << "exit: exit the program" << std::endl;
-            std::cout << "pr [register name]: print register" << std::endl;
-            std::cout << "pm [start index] [read size]: print memory" << std::endl;
-        }
-        else if ( line == "exit" || line == "leave" )
-        {
-            break;
-        }
-        else if ( tmp == "pr" )
-        {
-            line.erase( 0, 3 );
-            tmp = line.substr( index, line.find( ' ' ) );
-            visual_machine.print_reg( tmp );
-        }
-        else if ( tmp == "pm" )
-        {
-            tmp.clear();
-            line.erase( 0, 3 );
-            unsigned int space = line.find( ' ' );
-            tmp                = line.substr( index, space );
-            index              = space + 1;
-            if ( !isNumber( tmp ) )
-            {
-                DEBUG_INFO( "Parameter should be immediate!" );
-            }
-            unsigned int start = std::stoul( tmp );
-            line.erase( 0, index );
-            if ( !isNumber( line ) )
-            {
-                DEBUG_INFO( "Parameter should be immediate!" );
-            }
-            unsigned int read_size = std::stoul( line );
-            visual_machine.print_memory( start, read_size );
-        }
-        else if ( tmp == "p" )
-        {
-            tmp.clear();
-            line.erase( 0, 2 );
-            std::cout << line << std::endl;
-        }
-        else if ( tmp == "ps" )
-        {
-            visual_machine.print_stack();
-        }
-        else
-        {
-            do_instruction( line );
-        }
+        line         = tokens[visual_machine.get_register( "PC" )];
+        size_t index = 0;
+        visual_machine.set_register( "PC", visual_machine.get_register( "PC" ) + 1 );
+        do_instruction( line );
     }
 }
 
@@ -100,34 +33,129 @@ void repl()
  * @brief preprocess
  *
  */
-void preprocess()
+std::vector< std::vector< token > > preprocess()
 {
+    std::vector< std::vector< token > > tokens;
     size_t tmp_index = 0;
     for ( auto cur : current_code_stream )
     {
+        std::vector< token > line_tokens;
+        std::stringstream ss( cur );
         if ( cur == "main():" )
         {
-            label_table[cur] = tmp_index;
-            current_code_stream.erase( current_code_stream.begin() + tmp_index );
-            visual_machine.set_PC( tmp_index );
+            token cur_token;
+            cur_token.type  = LABEL;
+            cur_token.value = tmp_index;
+            cur_token.name  = cur;
+            line_tokens.push_back( cur_token );
+            tokens.push_back( line_tokens );
+            visual_machine.set_register( "PC", tmp_index );
+            label_table["main()"] = tmp_index;
         }
         else if ( cur.back() == ':' )
         {
-            cur.pop_back();
-            label_table[cur] = tmp_index;
-            current_code_stream.erase( current_code_stream.begin() + tmp_index );
+            token cur_token;
+            cur_token.type  = LABEL;
+            cur_token.value = tmp_index;
+            cur_token.name  = cur;
+            line_tokens.push_back( cur_token );
+            tokens.push_back( line_tokens );
+            label_table[cur.substr( 0, cur.size() - 1 )] = tmp_index;
         }
         else if ( cur.front() == '#' )
         {
-            current_code_stream.erase( current_code_stream.begin() + tmp_index );
+            continue;
+        }
+        else
+        {
+            std::string tmp;
+            while ( ss >> tmp )
+            {
+                token cur_token;
+                if ( isNumber( tmp ) )
+                {
+                    cur_token.type  = NUMBER;
+                    cur_token.value = std::stoul( tmp );
+                    cur_token.name  = tmp;
+                }
+                else if ( visual_machine.is_register( tmp ) )
+                {
+                    cur_token.type  = REGISTER;
+                    cur_token.value = visual_machine.get_register( tmp );
+                    cur_token.name  = tmp;
+                }
+                else if ( label_table.count( tmp ) )
+                {
+                    cur_token.type  = LABEL;
+                    cur_token.value = label_table[tmp];
+                    cur_token.name  = tmp;
+                }
+                else if ( tmp[0] == '[' )
+                {
+                    if ( tmp.back() != ']' )
+                    {
+                        DEBUG_INFO( "The parentheses cannot match!" );
+                        return {};
+                    }
+                    std::string tmp_str = tmp.substr( 1, tmp.size() - 2 );
+                    if ( isNumber( tmp_str ) )
+                    {
+                        cur_token.type = MEMORY;
+                        cur_token.value = visual_machine.get_memory( std::stoul( tmp_str ) );
+                        cur_token.name = tmp;
+                    }
+                    else
+                    {
+                        if ( visual_machine.is_register( tmp_str ) )
+                        {
+                            cur_token.type  = MEMORY;
+                            cur_token.value = visual_machine.get_register( tmp_str );
+                            cur_token.name  = tmp;
+                        }
+                        else if ( var_table.count( tmp_str ) )
+                        {
+                            cur_token.type  = MEMORY;
+                            cur_token.value = var_table[tmp_str];
+                            cur_token.name  = tmp;
+                        }
+                        else
+                        {
+                            DEBUG_INFO(
+                            "The memory address should be a number or a register!" );
+                            return {};
+                        }
+                    }
+                }
+                else if ( var_table.count( tmp ) )
+                {
+                    cur_token.type  = VAR;
+                    cur_token.value = var_table[tmp];
+                    cur_token.name  = tmp;
+                }
+                else
+                {
+                    std::transform( tmp.begin(), tmp.end(), tmp.begin(), ::toupper );
+                    if ( do_instruction_func.count( tmp ) )
+
+                    {
+                        cur_token.type  = OPER;
+                        cur_token.value = 0;
+                        cur_token.name  = tmp;
+                    }
+                }
+                line_tokens.push_back( cur_token );
+            }
+            tokens.push_back( line_tokens );
         }
         tmp_index++;
     }
+    return tokens;
 }
 
 int main( int argc, char** argv )
 {
-    preprocess();
-    repl();
+    load_file( "./float.asm" );
+    std::vector< std::vector< token > > tokens = preprocess();
+    repl( tokens );
     return 0;
 }
