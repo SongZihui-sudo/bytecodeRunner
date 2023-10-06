@@ -157,5 +157,6 @@ int main( int argc, char** argv )
     load_file( "./float.asm" );
     std::vector< std::vector< token > > tokens = preprocess();
     repl( tokens );
+    tokens.clear();
     return 0;
 }

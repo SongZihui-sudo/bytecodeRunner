@@ -65,7 +65,7 @@ bool isNumber( const std::string& str )
 
 bool do_instruction( std::vector< token > line )
 {
-
+    line.push_back( token() );
     line.push_back( token() );
     if ( do_instruction_func.count( line[0].name ) )
     {
@@ -396,7 +396,6 @@ void do_call( token dist, token source )
 
 void do_ret( token dist, token source )
 {
-
     visual_machine.set_register( "PC", visual_machine.top() );
     visual_machine.pop();
 }

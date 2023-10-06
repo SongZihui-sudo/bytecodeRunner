@@ -156,6 +156,7 @@ public:
     void set_register( std::string reg, unsigned int value )
     {
         std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
+        register_map.erase( reg );
         register_map[reg] = value;
     }
 

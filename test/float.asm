@@ -1,12 +1,15 @@
 add_func():
     push ebp
     mov ebp esp
-    add 1 2
+    add edi 2
     pr acc
+    pop ebp
     ret
 main():
     push ebp
-    mov esp ebp
+    mov ebp esp
     mov edi 1
     call add_func()
+    pop ebp
     leave
+    ret
