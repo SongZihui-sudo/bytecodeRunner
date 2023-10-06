@@ -53,6 +53,26 @@ const std::unordered_map< std::string, std::function< void( token, token ) > > d
     { "CALL", do_call },
     { "RET", do_ret } };
 
+#define value_get( val, key )                                                              \
+    switch ( key.type )                                                                    \
+    {                                                                                      \
+        case MEMORY:                                                                       \
+            val = visual_machine.get_memory( val );                                        \
+            break;                                                                         \
+        case REGISTER:                                                                     \
+            val = visual_machine.get_register( key.name );                                 \
+            break;                                                                         \
+        case VAR:                                                                          \
+            val = var_table[key.name];                                                     \
+            break;                                                                         \
+        case NUMBER:                                                                       \
+            val = key.value;                                                               \
+            break;                                                                         \
+        default:                                                                           \
+            DEBUG_INFO( "The destination should be a register or a variable!" );           \
+            break;                                                                         \
+    }
+
 bool isNumber( const std::string& str )
 {
     for ( char const& c : str )
@@ -88,21 +108,20 @@ void do_mov( token dist, token source )
         {
             tmp = visual_machine.get_memory( tmp );
         }
-        if ( dist.type == REGISTER )
+        switch ( dist.type )
         {
-            visual_machine.set_register( dist.name, tmp );
-        }
-        else if ( dist.type == VAR )
-        {
-            var_table[dist.name] = tmp;
-        }
-        else if ( dist.type == MEMORY )
-        {
-            visual_machine.set_memory( dist.value, tmp );
-        }
-        else
-        {
-            DEBUG_INFO( "The destination should be a register or a variable!" );
+            case REGISTER:
+                visual_machine.set_register( dist.name, tmp );
+                break;
+            case VAR:
+                var_table[dist.name] = tmp;
+                break;
+            case MEMORY:
+                visual_machine.set_memory( dist.value, tmp );
+                break;
+            default:
+                DEBUG_INFO( "The destination should be a register or a variable!" );
+                break;
         }
     }
 }
@@ -111,30 +130,8 @@ void do_add( token dist, token source )
 {
     unsigned int tmp1 = dist.value;
     unsigned int tmp2 = source.value;
-    if ( dist.type == MEMORY )
-    {
-        tmp1 = visual_machine.get_memory( tmp1 );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        tmp1 = visual_machine.get_register( dist.name );
-    }
-    else if ( dist.type == VAR )
-    {
-        tmp1 = var_table[dist.name];
-    }
-    if ( source.type == MEMORY )
-    {
-        tmp2 = visual_machine.get_memory( tmp2 );
-    }
-    else if ( source.type == REGISTER )
-    {
-        tmp2 = visual_machine.get_register( source.name );
-    }
-    else if ( source.type == VAR )
-    {
-        tmp2 = var_table[source.name];
-    }
+    value_get( tmp1, dist );
+    value_get( tmp2, source );
     visual_machine.set_register( "ACC", tmp1 + tmp2 );
 }
 
@@ -142,30 +139,8 @@ void do_sub( token dist, token source )
 {
     unsigned int tmp1 = dist.value;
     unsigned int tmp2 = source.value;
-    if ( dist.type == MEMORY )
-    {
-        tmp1 = visual_machine.get_memory( tmp1 );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        tmp1 = visual_machine.get_register( dist.name );
-    }
-    else if ( dist.type == VAR )
-    {
-        tmp1 = var_table[dist.name];
-    }
-    if ( source.type == MEMORY )
-    {
-        tmp2 = visual_machine.get_memory( tmp2 );
-    }
-    else if ( source.type == REGISTER )
-    {
-        tmp2 = visual_machine.get_register( source.name );
-    }
-    else if ( source.type == VAR )
-    {
-        tmp2 = var_table[source.name];
-    }
+    value_get( tmp1, dist );
+    value_get( tmp2, source );
     visual_machine.set_register( "ACC", tmp1 - tmp2 );
 }
 
@@ -173,30 +148,8 @@ void do_div( token dist, token source )
 {
     unsigned int tmp1 = dist.value;
     unsigned int tmp2 = source.value;
-    if ( dist.type == MEMORY )
-    {
-        tmp1 = visual_machine.get_memory( tmp1 );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        tmp1 = visual_machine.get_register( dist.name );
-    }
-    else if ( dist.type == VAR )
-    {
-        tmp1 = var_table[dist.name];
-    }
-    if ( source.type == MEMORY )
-    {
-        tmp2 = visual_machine.get_memory( tmp2 );
-    }
-    else if ( source.type == REGISTER )
-    {
-        tmp2 = visual_machine.get_register( source.name );
-    }
-    else if ( source.type == VAR )
-    {
-        tmp2 = var_table[source.name];
-    }
+    value_get( tmp1, dist );
+    value_get( tmp2, source );
     visual_machine.set_register( "MQ", tmp1 / tmp2 );
 }
 
@@ -204,54 +157,30 @@ void do_mul( token dist, token source )
 {
     unsigned int tmp1 = dist.value;
     unsigned int tmp2 = source.value;
-    if ( dist.type == MEMORY )
-    {
-        tmp1 = visual_machine.get_memory( tmp1 );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        tmp1 = visual_machine.get_register( dist.name );
-    }
-    else if ( dist.type == VAR )
-    {
-        tmp1 = var_table[dist.name];
-    }
-    if ( source.type == MEMORY )
-    {
-        tmp2 = visual_machine.get_memory( tmp2 );
-    }
-    else if ( source.type == REGISTER )
-    {
-        tmp2 = visual_machine.get_register( source.name );
-    }
-    else if ( source.type == VAR )
-    {
-        tmp2 = var_table[source.name];
-    }
+    value_get( tmp1, dist );
+    value_get( tmp2, source );
     visual_machine.set_register( "MQ", tmp1 * tmp2 );
 }
 
 void do_push( token dist, token source )
 {
-    if ( dist.type == NUMBER )
+    switch ( dist.type )
     {
-        visual_machine.push( dist.value );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        visual_machine.push( visual_machine.get_register( dist.name ) );
-    }
-    else if ( dist.type == VAR )
-    {
-        visual_machine.push( var_table[dist.name] );
-    }
-    else if ( dist.type == MEMORY )
-    {
-        visual_machine.push( visual_machine.get_memory( dist.value ) );
-    }
-    else
-    {
-        DEBUG_INFO( "The dist should be a number or a register or a variable!" );
+        case NUMBER:
+            visual_machine.push( dist.value );
+            break;
+        case REGISTER:
+            visual_machine.push( visual_machine.get_register( dist.name ) );
+            break;
+        case VAR:
+            visual_machine.push( var_table[dist.name] );
+            break;
+        case MEMORY:
+            visual_machine.push( visual_machine.get_memory( dist.value ) );
+            break;
+        default:
+            DEBUG_INFO( "The dist should be a number or a register or a variable!" );
+            break;
     }
 }
 
@@ -264,21 +193,20 @@ void do_pop( token dist, token source )
     else
     {
         unsigned int tmp = visual_machine.top();
-        if ( dist.type == REGISTER )
+        switch ( dist.type )
         {
-            visual_machine.set_register( dist.name, tmp );
-        }
-        else if ( dist.type == VAR )
-        {
-            var_table[dist.name] = tmp;
-        }
-        else if ( dist.type == MEMORY )
-        {
-            visual_machine.set_memory( dist.value, tmp );
-        }
-        else
-        {
-            DEBUG_INFO( "The destination should be a register or a variable!" );
+            case REGISTER:
+                visual_machine.set_register( dist.name, tmp );
+                break;
+            case VAR:
+                var_table[dist.name] = tmp;
+                break;
+            case MEMORY:
+                visual_machine.set_memory( dist.value, tmp );
+                break;
+            default:
+                DEBUG_INFO( "The destination should be a register or a variable!" );
+                break;
         }
     }
     visual_machine.pop();
@@ -302,31 +230,12 @@ void do_jmp( token dist, token source )
 
 void do_cmp( token dist, token source )
 {
-    if ( dist.type == NUMBER )
-    {
-        visual_machine.set_register( "ZF", dist.value == source.value );
-        visual_machine.set_register( "SF", dist.value < source.value );
-    }
-    else if ( dist.type == REGISTER )
-    {
-        visual_machine.set_register( "ZF",
-                                     visual_machine.get_register( dist.name ) == source.value );
-        visual_machine.set_register( "SF", visual_machine.get_register( dist.name ) < source.value );
-    }
-    else if ( dist.type == VAR )
-    {
-        visual_machine.set_register( "ZF", var_table[dist.name] == source.value );
-        visual_machine.set_register( "SF", var_table[dist.name] < source.value );
-    }
-    else if ( dist.type == MEMORY )
-    {
-        visual_machine.set_register( "ZF", visual_machine.get_memory( dist.value ) == source.value );
-        visual_machine.set_register( "SF", visual_machine.get_memory( dist.value ) < source.value );
-    }
-    else
-    {
-        DEBUG_INFO( "The destination should be a number or a register or a variable!" );
-    }
+    unsigned int tmp1 = dist.value;
+    unsigned int tmp2 = source.value;
+    value_get( tmp1, dist );
+    value_get( tmp2, source );
+    visual_machine.set_register( "ZF", tmp1 == tmp2 );
+    visual_machine.set_register( "SF", tmp1 < tmp2 );
 }
 
 void do_je( token dist, token source )
