@@ -85,7 +85,8 @@ xxx:
 
 #### 数据传送
 
-`mov source(立即数/寄存器/内存) destination(立即数/寄存器/内存)`
+`mov source(立即数/寄存器/内存) destination(立即数/寄存器/内存)`  
+`let source(字符串) destination(立即数)` 变量声明
 
 ## 例程
 

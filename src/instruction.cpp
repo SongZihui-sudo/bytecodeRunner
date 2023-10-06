@@ -51,7 +51,8 @@ const std::unordered_map< std::string, std::function< void( token, token ) > > d
     { "JB", do_jb },
     { "JNB", do_jnb },
     { "CALL", do_call },
-    { "RET", do_ret } };
+    { "RET", do_ret },
+    { "LET", do_let } };
 
 #define value_get( val, key )                                                              \
     switch ( key.type )                                                                    \
@@ -329,4 +330,11 @@ void load_file( std::string file_name )
         code_list.push_back( line );
     }
     file.close();
+}
+
+void do_let( token dist, token source )
+{
+    unsigned int tmp1 = 0;
+    value_get( tmp1, source );
+    var_table[dist.name] = tmp1;
 }

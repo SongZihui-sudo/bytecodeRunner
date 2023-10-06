@@ -175,6 +175,13 @@ void do_jb( token dist, token source );
  */
 void do_jnb( token dist, token source );
 
+/**
+ * @brief do let instruction
+ *
+ * @param code
+ */
+void do_let( token dist, token source );
+
 /*
  * @brief load file
  *

@@ -69,6 +69,7 @@ std::vector< std::vector< token > > preprocess()
         else
         {
             std::string tmp;
+            size_t pos = 0;
             while ( ss >> tmp )
             {
                 token cur_token;
@@ -126,12 +127,6 @@ std::vector< std::vector< token > > preprocess()
                         }
                     }
                 }
-                else if ( var_table.count( tmp ) )
-                {
-                    cur_token.type  = VAR;
-                    cur_token.value = var_table[tmp];
-                    cur_token.name  = tmp;
-                }
                 else
                 {
                     std::transform( tmp.begin(), tmp.end(), tmp.begin(), ::toupper );
@@ -142,8 +137,20 @@ std::vector< std::vector< token > > preprocess()
                         cur_token.value = 0;
                         cur_token.name  = tmp;
                     }
+                    else
+                    {
+                        if ( !pos )
+                        {
+                            DEBUG_INFO( "Opcode error: " << tmp );
+                            exit( 0 );
+                        }
+                        cur_token.type  = VAR;
+                        cur_token.value = 0;
+                        cur_token.name  = tmp;
+                    }
                 }
                 line_tokens.push_back( cur_token );
+                pos++;
             }
             tokens.push_back( line_tokens );
         }
@@ -154,7 +161,7 @@ std::vector< std::vector< token > > preprocess()
 
 int main( int argc, char** argv )
 {
-    load_file( "./float.asm" );
+    load_file( "./example.asm" );
     std::vector< std::vector< token > > tokens = preprocess();
     repl( tokens );
     return 0;

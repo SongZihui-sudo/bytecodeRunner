@@ -87,7 +87,8 @@ xxx:
 
 #### data transmission
 
-`mov source(immediate number/register/memory) destination(immediate number/register/memory)`
+`mov source(immediate number/register/memory) destination(immediate number/register/memory)`  
+`let source(string) destination(immediate value)` variable declaration
 
 ## Routine
 
