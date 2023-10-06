@@ -111,7 +111,7 @@ main():
 ```
 
 ```
-output: acc: 2
+output: acc: 3
 ```
 
 ## future
