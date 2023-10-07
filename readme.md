@@ -90,7 +90,7 @@ xxx:
 `mov source(immediate number/register/memory) destination(immediate number/register/memory)`  
 `let source(string) destination(immediate value)` variable declaration
 
-## Routine
+## Example
 
 ```asm
 test_func():
@@ -126,6 +126,12 @@ main():
 output: acc: 21
 ```
 
-## future
+## TO-DO
 
-Add floating point number operation instructions and logical operation instructions, and the processing of function parameters and local variables.
+- [x] Implement functions through stack
+- [x] Implement function parameter passing and local variables
+- [x] Implement process control instructions
+- [x] register indirect addressing
+- [x] Maintenance of system stack through esp and ebp
+- [ ] Floating point support
+- [ ] string support
