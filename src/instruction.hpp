@@ -26,6 +26,7 @@ enum token_type
     LABEL,
     VAR,
     OPER,
+    REGISTER_INDIRECT,
     UNKNOWN
 };
 

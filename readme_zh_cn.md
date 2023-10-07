@@ -91,18 +91,30 @@ xxx:
 ## 例程
 
 ```asm
-add_func():
+test_func():
     push ebp
     mov ebp esp
-    add edi 2
+    add esp 16
+    mov esp acc
+    add ebp 1
+    mov [acc] 32
+    add [acc] edi
     pr acc
+    sub esp 16
+    mov esp acc
     pop ebp
     ret
 main():
     push ebp
     mov ebp esp
+    add esp 16
+    mov esp acc
     mov edi 1
-    call add_func()
+    cmp edi 0
+    jne  22
+    call test_func()
+    sub esp 16
+    mov esp acc
     pop ebp
     leave
     ret

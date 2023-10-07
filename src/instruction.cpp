@@ -69,6 +69,9 @@ const std::unordered_map< std::string, std::function< void( token, token ) > > d
         case NUMBER:                                                                       \
             val = key.value;                                                               \
             break;                                                                         \
+        case REGISTER_INDIRECT:                                                            \
+            val = visual_machine.get_memory( visual_machine.get_register( key.name ) );    \
+            break;                                                                         \
         default:                                                                           \
             DEBUG_INFO( "The destination should be a register or a variable!" );           \
             break;                                                                         \
@@ -104,11 +107,8 @@ void do_mov( token dist, token source )
     }
     else
     {
-        unsigned int tmp = source.value;
-        if ( source.type == MEMORY )
-        {
-            tmp = visual_machine.get_memory( tmp );
-        }
+        unsigned int tmp = 0;
+        value_get( tmp, source );
         switch ( dist.type )
         {
             case REGISTER:
@@ -119,6 +119,9 @@ void do_mov( token dist, token source )
                 break;
             case MEMORY:
                 visual_machine.set_memory( dist.value, tmp );
+                break;
+            case REGISTER_INDIRECT:
+                visual_machine.set_memory( visual_machine.get_register( dist.name ), tmp );
                 break;
             default:
                 DEBUG_INFO( "The destination should be a register or a variable!" );
@@ -215,18 +218,15 @@ void do_pop( token dist, token source )
 
 void do_jmp( token dist, token source )
 {
-    if ( dist.type == MEMORY )
+    unsigned int tmp = 0;
+    value_get( tmp, dist );
+    tmp--;
+    if ( tmp > code_list.size() || tmp < 0 )
     {
-        visual_machine.set_register( "PC", visual_machine.get_memory( dist.value ) );
+        DEBUG_INFO( "The address is out of the range!" );
+        return;
     }
-    else if ( dist.type == LABEL || dist.type == NUMBER || dist.type == VAR || dist.type == REGISTER )
-    {
-        visual_machine.set_register( "PC", dist.value );
-    }
-    else
-    {
-        DEBUG_INFO( "The destination should be a number or a variable!" );
-    }
+    visual_machine.set_register( "PC", tmp );
 }
 
 void do_cmp( token dist, token source )
