@@ -1,23 +1,27 @@
 test_func():
     push ebp
     mov ebp esp
-    sub esp 0x10
+    add esp 16
+    mov esp acc
     add ebp 1
-    mov 32 [acc]
+    mov [acc] 32
     add [acc] edi
     pr acc
-    add esp 0x10
+    sub esp 16
+    mov esp acc
     pop ebp
     ret
 main():
     push ebp
     mov ebp esp
-    sub esp 0x10
+    add esp 16
+    mov esp acc
     mov edi 1
     cmp edi 0
-    jne  16
+    jne  22
     call test_func()
-    add esp 0x10
+    sub esp 16
+    mov esp acc
     pop ebp
     leave
     ret

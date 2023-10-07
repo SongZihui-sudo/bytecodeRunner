@@ -10,14 +10,6 @@
     std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
               << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl;
 
-extern std::unordered_map< std::string, unsigned int > var_table;
-
-extern std::vector< std::string > code_list;
-
-extern std::unordered_map< std::string, size_t > label_table;
-
-#define el else
-
 enum token_type
 {
     NUMBER,

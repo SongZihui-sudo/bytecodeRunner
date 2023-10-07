@@ -206,6 +206,4 @@ private:
     unsigned int memory[MEMORY_SIZE];
 };
 
-// visual machine
-extern machine visual_machine;
 #endif
