@@ -6,30 +6,11 @@
 #include <functional>
 #include <iostream>
 
+#include "token.hpp"
+
 #define DEBUG_INFO( mesage )                                                               \
     std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
               << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl;
-
-enum token_type
-{
-    NUMBER,
-    REGISTER,
-    MEMORY,
-    LABEL,
-    VAR,
-    OPER,
-    REGISTER_INDIRECT,
-    UNKNOWN
-};
-
-struct token
-{
-    std::string name;
-    unsigned int value;
-    token_type type;
-};
-
-extern const std::unordered_map< std::string, std::function< void( token, token ) > > do_instruction_func;
 
 /**
  * @brief the string is number?
@@ -40,146 +21,156 @@ extern const std::unordered_map< std::string, std::function< void( token, token 
  */
 bool isNumber( const std::string& str );
 
-/**
- * @brief run the code
- *
- * @param line code line
- * @return true successfully
- * @return false failed
- */
-bool do_instruction( std::vector< token > line );
+class instruction_runner
+{
+public:
+    instruction_runner()  = default;
+    ~instruction_runner() = default;
 
-/**
- * @brief do mov instruction
- *
- * @param code
- */
-void do_mov( token dist, token source );
+public:
+    /**
+     * @brief run the code
+     *
+     * @param line code line
+     * @return true successfully
+     * @return false failed
+     */
+    static bool do_instruction( std::vector< token > line );
 
-/**
- * @brief do add instruction
- *
- * @param code
- */
-void do_add( token dist, token source );
+    /*
+     * @brief load file
+     *
+     * @param file_name
+     */
+    static void load_file( std::string file_name );
 
-/**
- * @brief do sub instruction
- *
- * @param code
- */
-void do_sub( token dist, token source );
+    /**
+     * @brief do mov instruction
+     *
+     * @param code
+     */
+    static void do_mov( token dist, const token source );
 
-/**
- * @brief do div instruction
- *
- * @param code
- */
-void do_div( token dist, token source );
+    /**
+     * @brief do add instruction
+     *
+     * @param code
+     */
+    static void do_add( token dist, const token source );
 
-/**
- * @brief do mul instruction
- *
- * @param code
- */
-void do_mul( token dist, token source );
+    /**
+     * @brief do sub instruction
+     *
+     * @param code
+     */
+    static void do_sub( token dist, const token source );
 
-/**
- * @brief do push instruction
- *
- * @param code
- */
-void do_push( token dist, token source );
+    /**
+     * @brief do div instruction
+     *
+     * @param code
+     */
+    static void do_div( token dist, const token source );
 
-/**
- * @brief do pop instruction
- *
- * @param code
- */
-void do_pop( token dist, token source );
+    /**
+     * @brief do mul instruction
+     *
+     * @param code
+     */
+    static void do_mul( token dist, const token source );
 
-/**
- * @brief do jmp instruction
- *
- * @param code
- */
-void do_jmp( token dist, token source );
+    /**
+     * @brief do push instruction
+     *
+     * @param code
+     */
+    static void do_push( token dist, const token source );
 
-/**
- * @brief do cmp instruction
- *
- * @param code
- */
-void do_cmp( token dist, token source );
+    /**
+     * @brief do pop instruction
+     *
+     * @param code
+     */
+    static void do_pop( token dist, const token source );
 
-/**
- * @brief do je instruction
- *
- * @param code
- */
-void do_je( token dist, token source );
+    /**
+     * @brief do jmp instruction
+     *
+     * @param code
+     */
+    static void do_jmp( token dist, const token source );
 
-/**
- * @brief do jne instruction
- *
- * @param code
- */
-void do_jne( token dist, token source );
+    /**
+     * @brief do cmp instruction
+     *
+     * @param code
+     */
+    static void do_cmp( token dist, const token source );
 
-/**
- * @brief do call instruction
- *
- * @param code
- */
-void do_call( token dist, token source );
+    /**
+     * @brief do je instruction
+     *
+     * @param code
+     */
+    static void do_je( token dist, const token source );
 
-/**
- * @brief do ret instruction
- *
- * @param code
- */
-void do_ret( token dist, token source );
+    /**
+     * @brief do jne instruction
+     *
+     * @param code
+     */
+    static void do_jne( token dist, const token source );
 
-/**
- * @brief do jbe instruction
- *
- * @param code
- */
-void do_jbe( token dist, token source );
+    /**
+     * @brief do call instruction
+     *
+     * @param code
+     */
+    static void do_call( token dist, const token source );
 
-/**
- * @brief do ja instruction
- *
- * @param code
- */
-void do_ja( token dist, token source );
+    /**
+     * @brief do ret instruction
+     *
+     * @param code
+     */
+    static void do_ret( token dist, const token source );
 
-/**
- * @brief do jb instruction
- *
- * @param code
- */
-void do_jb( token dist, token source );
+    /**
+     * @brief do jbe instruction
+     *
+     * @param code
+     */
+    static void do_jbe( token dist, const token source );
 
-/**
- * @brief do jnb instruction
- *
- * @param code
- */
-void do_jnb( token dist, token source );
+    /**
+     * @brief do ja instruction
+     *
+     * @param code
+     */
+    static void do_ja( token dist, const token source );
 
-/**
- * @brief do let instruction
- *
- * @param code
- */
-void do_let( token dist, token source );
+    /**
+     * @brief do jb instruction
+     *
+     * @param code
+     */
+    static void do_jb( token dist, const token source );
 
-/*
- * @brief load file
- *
- * @param file_name
- */
-void load_file( std::string file_name );
+    /**
+     * @brief do jnb instruction
+     *
+     * @param code
+     */
+    static void do_jnb( token dist, const token source );
+
+    /**
+     * @brief do let instruction
+     *
+     * @param code
+     */
+    static void do_let( token dist, const token source );
+
+    static const std::unordered_map< std::string, std::function< void( token, token ) > > do_instruction_func;
+};
 
 #endif

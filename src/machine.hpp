@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <algorithm>
+#include <functional>
 
 #define DEBUG_INFO( mesage )                                                               \
     std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
@@ -23,11 +24,11 @@
  * @brief machine object
  *
  */
-class machine
+class machine_state
 {
 public:
-    machine()  = default;
-    ~machine() = default;
+    machine_state()  = default;
+    ~machine_state() = default;
 
     /**
      * @brief the register which you want to print
@@ -204,6 +205,8 @@ private:
         { "EBX", 0 }, { "ECX", 0 }, { "EDX", 0 }, { "ESP", 0 }, { "EBP", 0 }, { "ESI", 0 },
         { "EDI", 0 }, { "ACC", 0 }, { "MQ", 0 } };
     unsigned int memory[MEMORY_SIZE];
+
+public:
 };
 
 #endif

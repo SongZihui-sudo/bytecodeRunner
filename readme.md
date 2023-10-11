@@ -135,3 +135,4 @@ output: acc: 21
 - [x] Maintenance of system stack through esp and ebp
 - [ ] Floating point support
 - [ ] string support
+- [ ] Expression support

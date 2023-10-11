@@ -9,11 +9,11 @@
 #include "state.hpp"
 #include "instruction.hpp"
 
-#define current_code_stream gl_state.code_list
+#define current_code_stream visual_machine.code_list
 
 #define is_Comment( code ) if ( code[0] == '#' )
 
-global_state gl_state;
+machine visual_machine;
 
 /**
  * @brief repl
@@ -22,12 +22,13 @@ global_state gl_state;
 void repl( std::vector< std::vector< token > > tokens )
 {
     std::vector< token > line;
-    while ( gl_state.visual_machine.get_register( "PC" ) < tokens.size() )
+    while ( visual_machine.visual_machine_state.get_register( "PC" ) < tokens.size() )
     {
-        line         = tokens[gl_state.visual_machine.get_register( "PC" )];
+        line         = tokens[visual_machine.visual_machine_state.get_register( "PC" )];
         size_t index = 0;
-        gl_state.visual_machine.set_register( "PC", gl_state.visual_machine.get_register( "PC" ) + 1 );
-        do_instruction( line );
+        visual_machine.visual_machine_state.set_register(
+        "PC", visual_machine.visual_machine_state.get_register( "PC" ) + 1 );
+        visual_machine.visual_instruction_runner.do_instruction( line );
     }
 }
 
@@ -53,17 +54,17 @@ std::vector< std::vector< token > > preprocess()
             {
                 cur_token = { tmp, std::stoul( tmp ), NUMBER };
             }
-            else if ( gl_state.visual_machine.is_register( tmp ) )
+            else if ( visual_machine.visual_machine_state.is_register( tmp ) )
             {
                 cur_token = { tmp, 0, REGISTER };
             }
             else if ( cur.back() == ':' )
             {
                 cur_token = { cur, ( unsigned int )tmp_index, LABEL };
-                gl_state.label_table[cur.substr( 0, cur.size() - 1 )] = tmp_index;
+                visual_machine.label_table[cur.substr( 0, cur.size() - 1 )] = tmp_index;
                 if ( cur == "main():" )
                 {
-                    gl_state.visual_machine.set_register( "PC", tmp_index + 1 );
+                    visual_machine.visual_machine_state.set_register( "PC", tmp_index + 1 );
                 };
             }
             else if ( tmp[0] == '[' )
@@ -72,13 +73,13 @@ std::vector< std::vector< token > > preprocess()
                 if ( isNumber( tmp_str ) )
                 {
                     cur_token
-                    = { tmp, gl_state.visual_machine.get_memory( std::stoul( tmp_str ) ), MEMORY };
+                    = { tmp, visual_machine.visual_machine_state.get_memory( std::stoul( tmp_str ) ), MEMORY };
                 }
-                else if ( gl_state.visual_machine.is_register( tmp_str ) )
+                else if ( visual_machine.visual_machine_state.is_register( tmp_str ) )
                 {
                     tmp.pop_back();
                     tmp.erase( tmp.begin() );
-                    cur_token = { tmp, 0, REGISTER_INDIRECT };
+                    cur_token = { tmp, 0, EXPRESSION };
                 }
                 else
                 {
@@ -89,7 +90,7 @@ std::vector< std::vector< token > > preprocess()
             else
             {
                 std::transform( tmp.begin(), tmp.end(), tmp.begin(), ::toupper );
-                if ( do_instruction_func.count( tmp ) )
+                if ( visual_machine.visual_instruction_runner.do_instruction_func.count( tmp ) )
 
                 {
                     cur_token = { tmp, 0, OPER };
@@ -115,7 +116,7 @@ std::vector< std::vector< token > > preprocess()
 
 int main( int argc, char** argv )
 {
-    load_file( "./example.asm" );
+    visual_machine.visual_instruction_runner.load_file( "./example.asm" );
     std::vector< std::vector< token > > tokens = preprocess();
     repl( tokens );
     return 0;

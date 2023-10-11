@@ -6,16 +6,18 @@
 #include <unordered_map>
 
 #include "machine.hpp"
+#include "instruction.hpp"
 
-struct global_state
+struct machine
 {
     std::unordered_map< std::string, std::vector< std::string > > string_table;
     std::map< std::string, unsigned int > var_table;
     std::vector< std::string > code_list;
     std::map< std::string, size_t > label_table;
-    machine visual_machine;
+    machine_state visual_machine_state;
+    instruction_runner visual_instruction_runner;
 };
 
-extern global_state gl_state;
+extern machine visual_machine;
 
 #endif
