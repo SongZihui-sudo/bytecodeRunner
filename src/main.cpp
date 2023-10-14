@@ -25,9 +25,9 @@ void repl( std::vector< std::vector< token > > tokens )
     while ( visual_machine.visual_machine_state.get_register( "PC" )
             < UINT_VALUE( ( unsigned int )tokens.size() ) )
     {
-        line
-        = tokens[GET_UINT_VALUE( visual_machine.visual_machine_state.get_register( "P"
-                                                                                   "C" ) )];
+        line = tokens[GET_UINT_VALUE( visual_machine.visual_machine_state.get_register(
+        "P"
+        "C" ) )];
         size_t index = 0;
         visual_machine.visual_machine_state.set_register(
         "PC", visual_machine.visual_machine_state.get_register( "PC" ) + INT_VALUE( 1 ) );
@@ -53,9 +53,17 @@ std::vector< std::vector< token > > preprocess()
         {
             token cur_token;
             is_Comment( tmp ) { continue; }
-            else if ( isNumber( tmp ) )
+            else if ( is_uint( tmp ) )
             {
                 cur_token = { tmp, UINT_VALUE( std::stoul( tmp ) ), NUMBER };
+            }
+            else if ( is_int( tmp ) )
+            {
+                cur_token = { tmp, INT_VALUE( std::stoi( tmp ) ), NUMBER };
+            }
+            else if ( is_float( tmp ) )
+            {
+                cur_token = { tmp, FLOAT_VALUE( std::stod( tmp ) ), NUMBER };
             }
             else if ( visual_machine.visual_machine_state.is_register( tmp ) )
             {
@@ -75,10 +83,15 @@ std::vector< std::vector< token > > preprocess()
             else if ( tmp[0] == '[' )
             {
                 std::string tmp_str = tmp.substr( 1, tmp.size() - 2 );
-                if ( isNumber( tmp_str ) )
+                if ( is_uint( tmp_str ) )
                 {
                     cur_token
                     = { tmp, visual_machine.visual_machine_state.get_memory( std::stoul( tmp_str ) ), MEMORY };
+                }
+                else if ( is_int( tmp_str ) )
+                {
+                    cur_token
+                    = { tmp, visual_machine.visual_machine_state.get_memory( std::stoi( tmp_str ) ), MEMORY };
                 }
                 else if ( visual_machine.visual_machine_state.is_register( tmp_str ) )
                 {
@@ -88,7 +101,8 @@ std::vector< std::vector< token > > preprocess()
                 }
                 else
                 {
-                    DEBUG_INFO( "The memory address should be a number or a register!" );
+                    DEBUG_INFO(
+                    "The memory address should be a uint or int number or a register!" );
                     exit( -1 );
                 }
             }

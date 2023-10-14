@@ -133,6 +133,6 @@ output: acc: 21
 - [x] Implement process control instructions
 - [x] register indirect addressing
 - [x] Maintenance of system stack through esp and ebp
-- [ ] Floating point support
+- [x] Floating point support
 - [ ] string support
 - [ ] Expression support

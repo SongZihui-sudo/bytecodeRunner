@@ -45,7 +45,27 @@ public:
         std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
         if ( register_map.count( reg ) )
         {
-            std::cout << reg << ": " << std::hex << GET_UINT_VALUE( register_map[reg] ) << std::endl;
+            switch ( register_map[reg].mType )
+            {
+                case UNSIGNEDINT:
+                    std::cout << reg << ": " << GET_UINT_VALUE( register_map[reg] ) << std::endl;
+                    break;
+                case INT:
+                    std::cout << reg << ": " << GET_INT_VALUE( register_map[reg] ) << std::endl;
+                    break;
+                case FLOAT:
+                    std::cout << reg << ": " << GET_FLOAT_VALUE( register_map[reg] ) << std::endl;
+                    break;
+                case CHAR:
+                    std::cout << reg << ": " << GET_CHAR_VALUE( register_map[reg] ) << std::endl;
+                    break;
+                case BOOL:
+                    std::cout << reg << ": " << GET_BOOL_VALUE( register_map[reg] ) << std::endl;
+                    break;
+                default:
+                    DEBUG_INFO( "UNKNOWN TYPE!" );
+                    break;
+            }
         }
         else
         {
@@ -67,7 +87,32 @@ public:
             {
                 for ( size_t i = start; i < start + size; i++ )
                 {
-                    std::cout << "memory[" << i << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
+                    switch ( memory[i].mType )
+                    {
+                        case UNSIGNEDINT:
+                            std::cout << "memory[" << i
+                                      << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
+                            break;
+                        case INT:
+                            std::cout << "memory[" << i
+                                      << "]: " << GET_INT_VALUE( memory[i] ) << std::endl;
+                            break;
+                        case FLOAT:
+                            std::cout << "memory[" << i
+                                      << "]: " << GET_FLOAT_VALUE( memory[i] ) << std::endl;
+                            break;
+                        case CHAR:
+                            std::cout << "memory[" << i
+                                      << "]: " << GET_CHAR_VALUE( memory[i] ) << std::endl;
+                            break;
+                        case BOOL:
+                            std::cout << "memory[" << i
+                                      << "]: " << GET_BOOL_VALUE( memory[i] ) << std::endl;
+                            break;
+                        default:
+                            DEBUG_INFO( "UNKNOWN TYPE!" );
+                            break;
+                    }
                 }
             }
             else
@@ -88,13 +133,7 @@ public:
      * @brief print stack
      *
      */
-    void print_stack()
-    {
-        for ( size_t i = 639; i >= 512; i-- )
-        {
-            std::cout << "stack[" << i << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
-        }
-    }
+    void print_stack() { print_memory( 0, 512 ); }
 
 public:
     /**

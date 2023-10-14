@@ -74,7 +74,7 @@ std::unordered_map< std::string, std::function< void( token, token ) > > instruc
             DEBUG_INFO( "The destination should be a register or a variable!" );              \
     }
 
-bool isNumber( const std::string& str )
+bool is_uint( const std::string str )
 {
     for ( char const& c : str )
     {
@@ -82,6 +82,39 @@ bool isNumber( const std::string& str )
             return false;
     }
     return true;
+}
+
+bool is_int( const std::string str )
+{
+    std::string tmp = str;
+    if ( tmp[0] == '+' || tmp[0] == '-' )
+    {
+        tmp.erase( 0, 1 );
+    }
+    if ( is_uint( tmp ) )
+    {
+        return true;
+    }
+    return false;
+}
+
+bool is_float( const std::string str )
+{
+    std::string tmp = str;
+    if ( tmp[0] == '+' || tmp[0] == '-' )
+    {
+        tmp.erase( 0, 1 );
+    }
+    size_t has_dot = tmp.find( "." );
+    if ( has_dot != -1 )
+    {
+        tmp.erase( has_dot, 1 );
+    }
+    if ( is_uint( tmp ) )
+    {
+        return true;
+    }
+    return false;
 }
 
 bool instruction_runner::do_instruction( std::vector< token > line )

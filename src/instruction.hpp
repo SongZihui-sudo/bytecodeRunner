@@ -13,13 +13,31 @@
               << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl;
 
 /**
- * @brief the string is number?
+ * @brief the string is unsigned int number?
  *
  * @param str
  * @return true
  * @return false
  */
-bool isNumber( const std::string& str );
+bool is_uint( const std::string str );
+
+/**
+ * @brief the string is int number?
+ *
+ * @param str
+ * @return true
+ * @return false
+ */
+bool is_int( const std::string str );
+
+/**
+ * @brief the string is float number?
+ *
+ * @param str
+ * @return true
+ * @return false
+ */
+bool is_float( const std::string str );
 
 class instruction_runner
 {
