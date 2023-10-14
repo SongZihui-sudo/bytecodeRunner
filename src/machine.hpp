@@ -7,9 +7,14 @@
 #include <algorithm>
 #include <functional>
 
+#include "token.hpp"
+
 #define DEBUG_INFO( mesage )                                                               \
-    std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
-              << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl;
+    []()                                                                                   \
+    {                                                                                      \
+        std::cout << "File: " << __FILE__ << " line: " << __LINE__                         \
+                  << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl; \
+    }
 
 #define MEMORY_SIZE 2048
 #define STACK_SIZE 128
@@ -40,7 +45,7 @@ public:
         std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
         if ( register_map.count( reg ) )
         {
-            std::cout << reg << ": " << std::hex << register_map[reg] << std::endl;
+            std::cout << reg << ": " << std::hex << GET_UINT_VALUE( register_map[reg] ) << std::endl;
         }
         else
         {
@@ -62,14 +67,14 @@ public:
             {
                 for ( size_t i = start; i < start + size; i++ )
                 {
-                    std::cout << "memory[" << i << "]: " << memory[i] << std::endl;
+                    std::cout << "memory[" << i << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
                 }
             }
             else
             {
                 for ( size_t i = start; i > start + size; i-- )
                 {
-                    std::cout << "memory[" << i << "]: " << memory[i] << std::endl;
+                    std::cout << "memory[" << i << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
                 }
             }
         }
@@ -87,7 +92,7 @@ public:
     {
         for ( size_t i = 639; i >= 512; i-- )
         {
-            std::cout << "stack[" << i << "]: " << memory[i] << std::endl;
+            std::cout << "stack[" << i << "]: " << GET_UINT_VALUE( memory[i] ) << std::endl;
         }
     }
 
@@ -98,15 +103,16 @@ public:
      * @param index
      * @param value
      */
-    void set_memory( const size_t index, const unsigned int value )
+    void set_memory( const size_t index, const token_value value )
     {
         if ( index > MEMORY_SIZE )
         {
+            DEBUG_INFO( "The index is out of the range!" );
             return;
         }
         if ( index <= 638 && index >= 512 )
         {
-            DEBUG_INFO( "The address is belong to stack can not be set!" )
+            DEBUG_INFO( "The address is belong to stack can not be set!" );
             return;
         }
         memory[index] = value;
@@ -118,11 +124,11 @@ public:
      * @param index
      * @return memory value
      */
-    unsigned int get_memory( const size_t index )
+    token_value get_memory( const size_t index )
     {
         if ( index > MEMORY_SIZE || index < 0 )
         {
-            return 0;
+            ;
         }
         return memory[index];
     }
@@ -132,7 +138,7 @@ public:
      *
      * @param value
      */
-    unsigned int get_register( std::string reg )
+    token_value get_register( std::string reg )
     {
         std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
         return register_map[reg];
@@ -154,7 +160,7 @@ public:
      *
      * @param value
      */
-    void set_register( std::string reg, unsigned int value )
+    void set_register( std::string reg, const token_value value )
     {
         std::transform( reg.begin(), reg.end(), reg.begin(), ::toupper );
         register_map.erase( reg );
@@ -162,49 +168,55 @@ public:
     }
 
 public:
-    void push( unsigned int value )
+    void push( token_value value )
     {
-        if ( register_map["ESP"] > 511 )
+        if ( register_map["ESP"] > INT_VALUE( 511 ) )
         {
             DEBUG_INFO( "The stack is full!" );
-            return;
         }
         else
         {
-            memory[register_map["ESP"]] = value;
-            register_map["ESP"]++;
+            memory[GET_UINT_VALUE( register_map["ESP"] )] = value;
+            register_map["ESP"] = register_map["ESP"] + INT_VALUE( 1 );
         }
     }
 
     void pop()
     {
-        if ( !register_map["ESP"] )
+        if ( register_map["ESP"] == INT_VALUE( 0 ) )
         {
             DEBUG_INFO( "The stack is empty!" );
             return;
         }
-        register_map["ESP"]--;
+        register_map["ESP"] = register_map["ESP"] - INT_VALUE( 1 );
     }
 
-    unsigned int top()
+    token_value top()
     {
-        if ( !register_map["ESP"] )
+        if ( register_map["ESP"] == INT_VALUE( 0 ) )
         {
             DEBUG_INFO( "The stack is empty!" );
-            return 0;
+            return {};
         }
-        return memory[register_map["ESP"] - 1];
+        return memory[GET_UINT_VALUE( ( register_map["ESP"] - INT_VALUE( 1 ) ) )];
     }
 
-    bool stack_empty() { return register_map["ESP"] == 511; }
+    bool stack_empty() { return register_map["ESP"] == INT_VALUE( 511 ); }
 
 private:
-    std::unordered_map< std::string, unsigned int > register_map
-    = { { "ZF", 0 },  { "SF", 0 },  { "PC", 0 },  { "R8", 0 },  { "R9", 0 },  { "R10", 0 },
-        { "R11", 0 }, { "R12", 0 }, { "R13", 0 }, { "R14", 0 }, { "R15", 0 }, { "EAX", 0 },
-        { "EBX", 0 }, { "ECX", 0 }, { "EDX", 0 }, { "ESP", 0 }, { "EBP", 0 }, { "ESI", 0 },
-        { "EDI", 0 }, { "ACC", 0 }, { "MQ", 0 } };
-    unsigned int memory[MEMORY_SIZE];
+    std::unordered_map< std::string, token_value > register_map
+    = { { "ZF", BOOL_VALUE( false ) }, { "SF", BOOL_VALUE( false ) },
+        { "PC", UINT_VALUE( 0 ) },     { "R8", UINT_VALUE( 0 ) },
+        { "R9", UINT_VALUE( 0 ) },     { "R10", UINT_VALUE( 0 ) },
+        { "R11", UINT_VALUE( 0 ) },    { "R12", UINT_VALUE( 0 ) },
+        { "R13", UINT_VALUE( 0 ) },    { "R14", UINT_VALUE( 0 ) },
+        { "R15", UINT_VALUE( 0 ) },    { "EAX", UINT_VALUE( 0 ) },
+        { "EBX", UINT_VALUE( 0 ) },    { "ECX", UINT_VALUE( 0 ) },
+        { "EDX", UINT_VALUE( 0 ) },    { "ESP", UINT_VALUE( 0 ) },
+        { "EBP", UINT_VALUE( 0 ) },    { "ESI", UINT_VALUE( 0 ) },
+        { "EDI", UINT_VALUE( 0 ) },    { "ACC", UINT_VALUE( 0 ) },
+        { "MQ", UINT_VALUE( 0 ) } };
+    token_value memory[MEMORY_SIZE];
 
 public:
 };

@@ -11,7 +11,7 @@
 struct machine
 {
     std::unordered_map< std::string, std::vector< std::string > > string_table;
-    std::map< std::string, unsigned int > var_table;
+    std::map< std::string, token_value > var_table;
     std::vector< std::string > code_list;
     std::map< std::string, size_t > label_table;
     machine_state visual_machine_state;

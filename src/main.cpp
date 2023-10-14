@@ -22,12 +22,15 @@ machine visual_machine;
 void repl( std::vector< std::vector< token > > tokens )
 {
     std::vector< token > line;
-    while ( visual_machine.visual_machine_state.get_register( "PC" ) < tokens.size() )
+    while ( visual_machine.visual_machine_state.get_register( "PC" )
+            < UINT_VALUE( ( unsigned int )tokens.size() ) )
     {
-        line         = tokens[visual_machine.visual_machine_state.get_register( "PC" )];
+        line
+        = tokens[GET_UINT_VALUE( visual_machine.visual_machine_state.get_register( "P"
+                                                                                   "C" ) )];
         size_t index = 0;
         visual_machine.visual_machine_state.set_register(
-        "PC", visual_machine.visual_machine_state.get_register( "PC" ) + 1 );
+        "PC", visual_machine.visual_machine_state.get_register( "PC" ) + INT_VALUE( 1 ) );
         visual_machine.visual_instruction_runner.do_instruction( line );
     }
 }
@@ -52,19 +55,21 @@ std::vector< std::vector< token > > preprocess()
             is_Comment( tmp ) { continue; }
             else if ( isNumber( tmp ) )
             {
-                cur_token = { tmp, std::stoul( tmp ), NUMBER };
+                cur_token = { tmp, UINT_VALUE( std::stoul( tmp ) ), NUMBER };
             }
             else if ( visual_machine.visual_machine_state.is_register( tmp ) )
             {
-                cur_token = { tmp, 0, REGISTER };
+                cur_token = { tmp, UINT_VALUE( 0 ), REGISTER };
             }
             else if ( cur.back() == ':' )
             {
-                cur_token = { cur, ( unsigned int )tmp_index, LABEL };
+                cur_token = { cur, UINT_VALUE( tmp_index ), LABEL };
                 visual_machine.label_table[cur.substr( 0, cur.size() - 1 )] = tmp_index;
                 if ( cur == "main():" )
                 {
-                    visual_machine.visual_machine_state.set_register( "PC", tmp_index + 1 );
+                    visual_machine.visual_machine_state.set_register( "PC",
+                                                                      UINT_VALUE( tmp_index )
+                                                                      + UINT_VALUE( 1 ) );
                 };
             }
             else if ( tmp[0] == '[' )
@@ -79,30 +84,30 @@ std::vector< std::vector< token > > preprocess()
                 {
                     tmp.pop_back();
                     tmp.erase( tmp.begin() );
-                    cur_token = { tmp, 0, EXPRESSION };
+                    cur_token = { tmp, UINT_VALUE( 0 ), EXPRESSION };
                 }
                 else
                 {
                     DEBUG_INFO( "The memory address should be a number or a register!" );
-                    return {};
+                    exit( -1 );
                 }
             }
             else
             {
                 std::transform( tmp.begin(), tmp.end(), tmp.begin(), ::toupper );
-                if ( visual_machine.visual_instruction_runner.do_instruction_func.count( tmp ) )
+                if ( visual_machine.visual_instruction_runner.do_instruction_funcs.count( tmp ) )
 
                 {
-                    cur_token = { tmp, 0, OPER };
+                    cur_token = { tmp, UINT_VALUE( 0 ), OPER };
                 }
                 else
                 {
                     if ( !pos )
                     {
                         DEBUG_INFO( "Opcode error: " << tmp );
-                        exit( 0 );
+                        exit( -1 );
                     }
-                    cur_token = { tmp, 0, VAR };
+                    cur_token = { tmp, UINT_VALUE( 0 ), VAR };
                 }
             }
             line_tokens.push_back( cur_token );

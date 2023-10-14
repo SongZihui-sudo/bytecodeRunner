@@ -170,7 +170,14 @@ public:
      */
     static void do_let( token dist, const token source );
 
-    static const std::unordered_map< std::string, std::function< void( token, token ) > > do_instruction_func;
+    /**
+     * @brief do expression
+     *
+     * @param source
+     */
+    static token do_expression( const token source );
+
+    static std::unordered_map< std::string, std::function< void( token, token ) > > do_instruction_funcs;
 };
 
 #endif
