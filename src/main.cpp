@@ -53,6 +53,10 @@ std::vector< std::vector< token > > preprocess()
         {
             token cur_token;
             is_Comment( tmp ) { continue; }
+            else if ( is_char( tmp ) )
+            {
+                cur_token = { tmp, CHAR_VALUE( std::stoul( tmp ) ), NUMBER };
+            }
             else if ( is_uint( tmp ) )
             {
                 cur_token = { tmp, UINT_VALUE( std::stoul( tmp ) ), NUMBER };

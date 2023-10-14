@@ -75,7 +75,11 @@ public:
             double tmp = f + j;
             return token_value( FLOAT, tmp );
         }
-        token_value operator()( char& c, const char j ) const { throw "char can not add!"; }
+        token_value operator()( char& c, const char j ) const
+        {
+            char tmp = c + j;
+            return token_value( UNSIGNEDINT, tmp );
+        }
         token_value operator()( bool& c, const bool j ) const { throw "bool can not add!"; }
     };
 
@@ -100,7 +104,11 @@ public:
             double tmp = f - j;
             return token_value( FLOAT, tmp );
         }
-        token_value operator()( char& c, const char j ) const { throw "char can not sub!"; }
+        token_value operator()( char& c, const char j ) const
+        {
+            char tmp = c + j;
+            return token_value( CHAR, tmp );
+        }
         token_value operator()( bool& c, const bool j ) const { throw "bool can not sub!"; }
     };
 
@@ -125,7 +133,11 @@ public:
             double tmp = f * j;
             return token_value( FLOAT, tmp );
         }
-        token_value operator()( char& c, const char j ) const { throw "char can not mul!"; }
+        token_value operator()( char& c, const char j ) const
+        {
+            char tmp = c * j;
+            return token_value( CHAR, tmp );
+        }
         token_value operator()( bool& c, const bool j ) const { throw "bool can not mul!"; }
     };
 
@@ -150,7 +162,11 @@ public:
             double tmp = f / j;
             return token_value( FLOAT, tmp );
         }
-        token_value operator()( char& c, const char j ) const { throw "char can not div!"; }
+        token_value operator()( char& c, const char j ) const
+        {
+            char tmp = c / j;
+            return token_value( CHAR, tmp );
+        }
         token_value operator()( bool& c, const bool j ) const { throw "bool can not div!"; }
     };
 
@@ -176,7 +192,8 @@ public:
         }
         token_value operator()( char& c, const char j ) const
         {
-            throw "char can not left shift!";
+            char tmp = c << j;
+            return token_value( CHAR, tmp );
         }
         token_value operator()( bool& c, const bool j ) const
         {
@@ -206,7 +223,8 @@ public:
         }
         token_value operator()( char& c, const char j ) const
         {
-            throw "char can not left shift!";
+            char tmp = c >> j;
+            return token_value( CHAR, tmp );
         }
         token_value operator()( bool& c, const bool j ) const
         {

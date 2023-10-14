@@ -117,6 +117,20 @@ bool is_float( const std::string str )
     return false;
 }
 
+bool is_char( const std::string str )
+{
+    int tmp = 0;
+    if ( is_uint( str ) )
+    {
+        tmp = std::stoi( str );
+    }
+    if ( ( 'A' < tmp && tmp < 'Z' ) || ( 'a' < tmp && tmp < 'z' ) )
+    {
+        return true;
+    }
+    return false;
+}
+
 bool instruction_runner::do_instruction( std::vector< token > line )
 {
     line.push_back( token() );

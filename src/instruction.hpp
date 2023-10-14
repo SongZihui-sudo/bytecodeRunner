@@ -39,6 +39,15 @@ bool is_int( const std::string str );
  */
 bool is_float( const std::string str );
 
+/**
+ * @brief the string is char
+ *
+ * @param str
+ * @return true
+ * @return false
+ */
+bool is_char(const std::string str);
+
 class instruction_runner
 {
 public:
