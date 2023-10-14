@@ -78,7 +78,7 @@ public:
         token_value operator()( char& c, const char j ) const
         {
             char tmp = c + j;
-            return token_value( UNSIGNEDINT, tmp );
+            return token_value( CHAR, tmp );
         }
         token_value operator()( bool& c, const bool j ) const { throw "bool can not add!"; }
     };

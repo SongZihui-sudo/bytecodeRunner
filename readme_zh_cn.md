@@ -22,10 +22,16 @@ xmake
 
 ```c++
 static std::vector< std::string > asm_code_test7
-= { "test_func():", "push ebp", "mov ebp esp", "add 1 1",          "pr acc", "ret",
-    "main():",      "push ebp", "mov ebp esp", "call test_func()", "leave",  "ret" };
+= { "test_func():", "push ebp", "mov ebp, esp", "add 1, 1",          "pr acc", "ret",
+    "main():",      "push ebp", "mov ebp, esp", "call test_func()", "leave",  "ret" };
 
 #define current_code_stream asm_code_test7
+```
+
+从文本文件运行程序：
+
+```c++
+visual_machine.visual_instruction_runner.load_file( "./example.asm" );
 ```
 
 ## 字节码的指令与语法
@@ -35,7 +41,7 @@ static std::vector< std::string > asm_code_test7
 指令格式:
 
 ```
-操作码 地址码 1 [地址码 2]
+操作码 地址码1, [地址码2]
 ```
 
 标签:
@@ -44,6 +50,10 @@ static std::vector< std::string > asm_code_test7
 xxx:
     指令
 ```
+
+字符：'c'  
+立即数: 1,2,3,4,........  
+内存寻址: [立即数/寄存器/变量]
 
 **main() 为整个程序的入口点**
 
@@ -56,11 +66,11 @@ xxx:
 
 #### 基本运算
 
-`add num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 + num2  
-`sub num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 - num1  
-`mul num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num1 \* num2  
-`div num1(立即数/寄存器/内存) num2(立即数/寄存器/内存)` num2 / num1  
-`cmp destination(立即数/寄存器/内存) source(立即数/寄存器/内存)` 比较 num1 与 num2.如果 `num1 > num2` -> `SF=1`,`num1 < num2`->`SF=0`, `num1 == num2`->`ZF=1`,`num1 != num2`->`ZF=0`.
+`add num1(立即数/寄存器/内存), num2(立即数/寄存器/内存)` num1 + num2  
+`sub num1(立即数/寄存器/内存), num2(立即数/寄存器/内存)` num2 - num1  
+`mul num1(立即数/寄存器/内存), num2(立即数/寄存器/内存)` num1 \* num2  
+`div num1(立即数/寄存器/内存), num2(立即数/寄存器/内存)` num2 / num1  
+`cmp destination(立即数/寄存器/内存), source(立即数/寄存器/内存)` 比较 num1 与 num2.如果 `num1 > num2` -> `SF=1`,`num1 < num2`->`SF=0`, `num1 == num2`->`ZF=1`,`num1 != num2`->`ZF=0`.
 
 #### 跳转
 
@@ -85,36 +95,36 @@ xxx:
 
 #### 数据传送
 
-`mov source(立即数/寄存器/内存) destination(立即数/寄存器/内存)`  
-`let source(字符串) destination(立即数)` 变量声明
+`mov source(立即数/寄存器/内存), destination(立即数/寄存器/内存)`  
+`let source(字符串), destination(立即数)` 变量声明
 
 ## 例程
 
 ```asm
 test_func():
     push ebp
-    mov ebp esp
-    add esp 16
-    mov esp acc
+    mov ebp, esp
+    add esp, 16
+    mov esp, acc
     add ebp 1
-    mov [acc] 32
-    add [acc] edi
+    mov [acc], 32
+    add [acc], edi
     pr acc
-    sub esp 16
-    mov esp acc
+    sub esp, 16
+    mov esp, acc
     pop ebp
     ret
 main():
     push ebp
-    mov ebp esp
-    add esp 16
-    mov esp acc
-    mov edi 1
-    cmp edi 0
+    mov ebp, esp
+    add esp, 16
+    mov esp, acc
+    mov edi, 1
+    cmp edi, 0
     jne  22
     call test_func()
-    sub esp 16
-    mov esp acc
+    sub esp, 16
+    mov esp, acc
     pop ebp
     leave
     ret

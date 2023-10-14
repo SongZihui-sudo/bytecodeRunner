@@ -24,10 +24,17 @@ one example:
 
 ```c++
 static std::vector< std::string > asm_code_test7
-= { "test_func():", "push ebp", "mov ebp esp", "add 1 1", "pr acc", "ret",
-     "main():", "push ebp", "mov ebp esp", "call test_func()", "leave", "ret" };
+= { "test_func():", "push ebp", "mov ebp, esp", "add 1, 1", "pr acc", "ret",
+     "main():", "push ebp", "mov ebp, esp", "call test_func()", "leave", "ret" };
 
 #define current_code_stream asm_code_test7
+```
+
+or  
+run code from text file.
+
+```c++
+visual_machine.visual_instruction_runner.load_file( "./example.asm" );
 ```
 
 ## Instructions and syntax of bytecode
@@ -37,7 +44,7 @@ static std::vector< std::string > asm_code_test7
 Command format:
 
 ```
-Opcode address_code1 [address_code2]
+Opcode address_code1, [address_code2]
 ```
 
 Label:
@@ -46,6 +53,10 @@ Label:
 xxx:
      instruction
 ```
+
+Character: 'c'  
+Immediate number: 1,2,3,4,.....  
+Memory addressing: [immediate data/register/variable]
 
 **main() is the entry point of the entire program**
 
@@ -58,11 +69,11 @@ xxx:
 
 #### Basic operations
 
-`add num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 + num2  
-`sub num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 - num1  
-`mul num1(immediate value/register/memory) num2(immediate value/register/memory)` num1 \* num2  
-`div num1(immediate value/register/memory) num2(immediate value/register/memory)` num2 / num1  
-`cmp destination(immediate value/register/memory) source(immediate value/register/memory)` Compare num1 and num2. If `num1 > num2` -> `SF=1`, `num1 < num2`->`SF= 0`, `num1 == num2`->`ZF=1`, `num1 != num2`->`ZF=0`.
+`add num1(immediate value/register/memory), num2(immediate value/register/memory)` num1 + num2  
+`sub num1(immediate value/register/memory), num2(immediate value/register/memory)` num2 - num1  
+`mul num1(immediate value/register/memory), num2(immediate value/register/memory)` num1 \* num2  
+`div num1(immediate value/register/memory), num2(immediate value/register/memory)` num2 / num1  
+`cmp destination(immediate value/register/memory), source(immediate value/register/memory)` Compare num1 and num2. If `num1 > num2` -> `SF=1`, `num1 < num2`->`SF= 0`, `num1 == num2`->`ZF=1`, `num1 != num2`->`ZF=0`.
 
 #### Jump
 
@@ -87,7 +98,7 @@ xxx:
 
 #### data transmission
 
-`mov source(immediate number/register/memory) destination(immediate number/register/memory)`  
+`mov source(immediate number/register/memory), destination(immediate number/register/memory)`  
 `let source(string) destination(immediate value)` variable declaration
 
 ## Example
@@ -95,28 +106,28 @@ xxx:
 ```asm
 test_func():
     push ebp
-    mov ebp esp
-    add esp 16
-    mov esp acc
-    add ebp 1
-    mov [acc] 32
-    add [acc] edi
+    mov ebp, esp
+    add esp, 16
+    mov esp, acc
+    add ebp, 1
+    mov [acc], 32
+    add [acc], edi
     pr acc
-    sub esp 16
-    mov esp acc
+    sub esp, 16
+    mov esp, acc
     pop ebp
     ret
 main():
     push ebp
-    mov ebp esp
-    add esp 16
-    mov esp acc
-    mov edi 1
-    cmp edi 0
+    mov ebp, esp
+    add esp, 16
+    mov esp, acc
+    mov edi, 1
+    cmp edi, 0
     jne  22
     call test_func()
-    sub esp 16
-    mov esp acc
+    sub esp, 16
+    mov esp, acc
     pop ebp
     leave
     ret

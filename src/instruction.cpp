@@ -119,14 +119,15 @@ bool is_float( const std::string str )
 
 bool is_char( const std::string str )
 {
-    int tmp = 0;
-    if ( is_uint( str ) )
+    std::string tmp = str;
+    if ( tmp[0] == '\'' && tmp[str.size() - 1] == '\'' )
     {
-        tmp = std::stoi( str );
-    }
-    if ( ( 'A' < tmp && tmp < 'Z' ) || ( 'a' < tmp && tmp < 'z' ) )
-    {
-        return true;
+        tmp.pop_back();
+        tmp.erase( 0, 1 );
+        if ( tmp.size() == 1 )
+        {
+            return true;
+        }
     }
     return false;
 }

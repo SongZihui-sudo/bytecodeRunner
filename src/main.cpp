@@ -46,6 +46,7 @@ std::vector< std::vector< token > > preprocess()
     for ( auto cur : current_code_stream )
     {
         std::vector< token > line_tokens;
+        cur.erase( remove( cur.begin(), cur.end(), ',' ), cur.end() );
         std::stringstream ss( cur );
         std::string tmp;
         size_t pos = 0;
@@ -55,7 +56,9 @@ std::vector< std::vector< token > > preprocess()
             is_Comment( tmp ) { continue; }
             else if ( is_char( tmp ) )
             {
-                cur_token = { tmp, CHAR_VALUE( std::stoul( tmp ) ), NUMBER };
+                tmp.pop_back();
+                tmp.erase( 0, 1 );
+                cur_token = { tmp, CHAR_VALUE( tmp[0] ), NUMBER };
             }
             else if ( is_uint( tmp ) )
             {

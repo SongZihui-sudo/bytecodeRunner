@@ -1,12 +1,13 @@
 main():
-    let tmp1, 99
-    let tmp2, 100
     push ebp
     mov ebp, esp
     add esp, 16
     mov esp, acc
-    add tmp1, tmp2
-    pr acc
+    add ebp, 1
+    mov [acc], 'a'
+    add ebp, 2
+    mov [acc], 'b'
+    ps
     sub esp, 16
     mov esp, acc
     pop ebp
