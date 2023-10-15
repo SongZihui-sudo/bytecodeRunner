@@ -42,10 +42,10 @@ public:
     token_value()
     {
         mType  = NONE;
-        mValue = NULL;
+        mValue = 0;
     }
 
-    token_value( token_value_type type, std::variant< unsigned int, int, double, char, bool > value )
+    token_value( token_value_type type, t_token_value value )
     {
         mType  = type;
         mValue = value;

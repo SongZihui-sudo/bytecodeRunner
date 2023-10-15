@@ -3,8 +3,8 @@
 #include <vector>
 #include <sstream>
 #include <stack>
-#include <iomanip>
 #include <array>
+#include <algorithm>
 
 #include "state.hpp"
 #include "instruction.hpp"
@@ -46,7 +46,7 @@ std::vector< std::vector< token > > preprocess()
     for ( auto cur : current_code_stream )
     {
         std::vector< token > line_tokens;
-        cur.erase( remove( cur.begin(), cur.end(), ',' ), cur.end() );
+        std::replace(cur.begin(), cur.end(), ',', ' ');
         std::stringstream ss( cur );
         std::string tmp;
         size_t pos = 0;
@@ -117,7 +117,6 @@ std::vector< std::vector< token > > preprocess()
             {
                 std::transform( tmp.begin(), tmp.end(), tmp.begin(), ::toupper );
                 if ( visual_machine.visual_instruction_runner.do_instruction_funcs.count( tmp ) )
-
                 {
                     cur_token = { tmp, UINT_VALUE( 0 ), OPER };
                 }

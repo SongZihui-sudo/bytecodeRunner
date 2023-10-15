@@ -1,9 +1,11 @@
 #include <sstream>
 #include <fstream>
 #include <array>
+#include <stack>
 
 #include "instruction.hpp"
 #include "state.hpp"
+#include "token.hpp"
 
 std::unordered_map< std::string, std::function< void( token, token ) > > instruction_runner::do_instruction_funcs
 = { { "HELP",
@@ -51,27 +53,27 @@ std::unordered_map< std::string, std::function< void( token, token ) > > instruc
     { "RET", instruction_runner::do_ret },
     { "LET", instruction_runner::do_let } };
 
-#define value_get( val, key )                                                                 \
-    switch ( key.type )                                                                       \
-    {                                                                                         \
-        case MEMORY:                                                                          \
-            val = visual_machine.visual_machine_state.get_memory( GET_UINT_VALUE( val ) );    \
-            break;                                                                            \
-        case REGISTER:                                                                        \
-            val = visual_machine.visual_machine_state.get_register( key.name );               \
-            break;                                                                            \
-        case VAR:                                                                             \
-            val = visual_machine.var_table[key.name];                                         \
-            break;                                                                            \
-        case NUMBER:                                                                          \
-            val = key.value;                                                                  \
-            break;                                                                            \
-        case EXPRESSION:                                                                      \
-            val = visual_machine.visual_machine_state.get_memory(                             \
-            GET_UINT_VALUE( visual_machine.visual_machine_state.get_register( key.name ) ) ); \
-            break;                                                                            \
-        default:                                                                              \
-            DEBUG_INFO( "The destination should be a register or a variable!" );              \
+#define value_get( val, key )                                                              \
+    switch ( key.type )                                                                    \
+    {                                                                                      \
+        case MEMORY:                                                                       \
+            val = visual_machine.visual_machine_state.get_memory( GET_UINT_VALUE( val ) ); \
+            break;                                                                         \
+        case REGISTER:                                                                     \
+            val = visual_machine.visual_machine_state.get_register( key.name );            \
+            break;                                                                         \
+        case VAR:                                                                          \
+            val = visual_machine.var_table[key.name];                                      \
+            break;                                                                         \
+        case NUMBER:                                                                       \
+            val = key.value;                                                               \
+            break;                                                                         \
+        case EXPRESSION:                                                                   \
+            val = visual_machine.visual_machine_state.get_memory(                          \
+            GET_UINT_VALUE( do_expression( key ).value ) );                                \
+            break;                                                                         \
+        default:                                                                           \
+            DEBUG_INFO( "The destination should be a register or a variable!" );           \
     }
 
 bool is_uint( const std::string str )
@@ -392,8 +394,73 @@ void instruction_runner::do_let( token dist, const token source )
 
 token instruction_runner::do_expression( const token source )
 {
+    token expression;
+    std::stack< char > operators;
+    std::stack< token_value > numbers;
+    std::string buffer;
+    token_value temp;
+    std::string suffix;
     for ( char cc : source.name )
     {
+        switch ( cc )
+        {
+            case '(':
+                operators.push( cc );
+                break;
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+                /* is a register */
+                if ( visual_machine.visual_machine_state.is_register( buffer ) )
+                {
+                    temp = visual_machine.visual_machine_state.get_register( buffer );
+                }
+                /* is a var */
+                else if ( visual_machine.var_table.count( buffer ) )
+                {
+                    temp = visual_machine.var_table[buffer];
+                }
+                /* is number */
+                else
+                {
+                    /* uint number */
+                    if ( is_uint( buffer ) )
+                    {
+                        temp = UINT_VALUE( std::stoul( buffer ) );
+                    }
+                    /* int number */
+                    else if ( is_int( buffer ) )
+                    {
+                        temp = INT_VALUE( std::stoi( buffer ) );
+                    }
+                    /* float number */
+                    else if ( is_float( buffer ) )
+                    {
+                        temp = FLOAT_VALUE( std::stod( buffer ) );
+                    }
+                    else
+                    {
+                        DEBUG_INFO( "UNKNOEN EXPRESSION " << buffer );
+                    }
+                }
+                numbers.push( temp );
+                buffer.clear();
+                /* compare operator */
+                if ( operators.empty()
+                     || ( ( cc == '*' || cc == '/' )
+                          && ( operators.top() == '+' || operator.top() == '-' ) ) )
+                {
+                    operators.push( cc );
+                }
+                else
+                {
+                }
+                break;
+            default:
+                buffer.push_back( cc );
+                break;
+        }
     }
-    return {};
+    return expression;
 }

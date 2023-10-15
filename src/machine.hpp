@@ -10,11 +10,8 @@
 #include "token.hpp"
 
 #define DEBUG_INFO( mesage )                                                               \
-    []()                                                                                   \
-    {                                                                                      \
-        std::cout << "File: " << __FILE__ << " line: " << __LINE__                         \
-                  << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl; \
-    }
+    std::cout << "File: " << __FILE__ << " line: " << __LINE__                             \
+              << " Function: " << __FUNCTION__ << " Message: " << mesage << std::endl;
 
 #define MEMORY_SIZE 2048
 #define STACK_SIZE 128
